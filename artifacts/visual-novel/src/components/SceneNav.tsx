@@ -5,6 +5,7 @@ interface Props {
   currentIndex: number;
   completedScenes: Set<string>;
   onSelectScene: (index: number) => void;
+  onOpenSettings: () => void;
   onReturnToMenu: () => void;
 }
 
@@ -13,6 +14,7 @@ export default function SceneNav({
   currentIndex,
   completedScenes,
   onSelectScene,
+  onOpenSettings,
   onReturnToMenu,
 }: Props) {
   return (
@@ -43,6 +45,9 @@ export default function SceneNav({
         </div>
 
         <div className="scene-nav-footer">
+          <button className="scene-nav-menu-btn" onClick={onOpenSettings}>
+            Options
+          </button>
           <button className="scene-nav-menu-btn" onClick={onReturnToMenu}>
             ← Main Menu
           </button>

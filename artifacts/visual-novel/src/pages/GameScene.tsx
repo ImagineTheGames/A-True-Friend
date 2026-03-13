@@ -90,13 +90,6 @@ export default function GameScene({
           {locationLabel && (
             <span className="scene-location-tag">{locationLabel}</span>
           )}
-          <button
-            className="settings-toggle-btn"
-            onClick={() => { setSettingsOpen((o) => !o); setNavOpen(false); }}
-            aria-label="Settings"
-          >
-            ⚙
-          </button>
         </div>
       </div>
 
@@ -106,6 +99,7 @@ export default function GameScene({
           currentIndex={sceneIndex}
           completedScenes={completedScenes}
           onSelectScene={(i) => { setNavOpen(false); onGoToScene(i); }}
+          onOpenSettings={() => { setNavOpen(false); setSettingsOpen(true); }}
           onReturnToMenu={() => { setNavOpen(false); onReturnToMenu(); }}
         />
       )}

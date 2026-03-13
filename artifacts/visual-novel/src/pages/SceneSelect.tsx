@@ -1,15 +1,57 @@
-import { Scene } from "../data/types";
+import { useState } from "react";
+import { Scene, GameSettings } from "../data/types";
+import SceneNav from "../components/SceneNav";
+import SettingsPanel from "../components/SettingsPanel";
 
 interface Props {
   scenes: Scene[];
   completedScenes: Set<string>;
+  settings: GameSettings;
+  onSettingsChange: (patch: Partial<GameSettings>) => void;
   onSelect: (scene: Scene) => void;
 }
 
-export default function SceneSelect({ scenes, completedScenes, onSelect }: Props) {
+export default function SceneSelect({
+  scenes,
+  completedScenes,
+  settings,
+  onSettingsChange,
+  onSelect,
+}: Props) {
+  const [navOpen, setNavOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   return (
     <div className="scene-select-page">
       <div className="scene-select-bg" />
+
+      <button
+        className="nav-toggle-btn menu-page-nav-btn"
+        onClick={() => { setNavOpen((o) => !o); setSettingsOpen(false); }}
+        aria-label="Scene navigation"
+      >
+        <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
+      </button>
+
+      {navOpen && (
+        <SceneNav
+          scenes={scenes}
+          currentIndex={-1}
+          completedScenes={completedScenes}
+          hideMenuButton
+          onSelectScene={(i) => { setNavOpen(false); onSelect(scenes[i]); }}
+          onOpenSettings={() => { setNavOpen(false); setSettingsOpen(true); }}
+        />
+      )}
+
+      {settingsOpen && (
+        <SettingsPanel
+          settings={settings}
+          onChange={onSettingsChange}
+          onClose={() => setSettingsOpen(false)}
+        />
+      )}
+
       <div className="scene-select-content">
         <div className="title-block">
           <h1 className="game-title">ARIA</h1>

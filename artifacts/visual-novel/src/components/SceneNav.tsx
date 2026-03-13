@@ -4,15 +4,17 @@ interface Props {
   scenes: Scene[];
   currentIndex: number;
   completedScenes: Set<string>;
+  hideMenuButton?: boolean;
   onSelectScene: (index: number) => void;
   onOpenSettings: () => void;
-  onReturnToMenu: () => void;
+  onReturnToMenu?: () => void;
 }
 
 export default function SceneNav({
   scenes,
   currentIndex,
   completedScenes,
+  hideMenuButton = false,
   onSelectScene,
   onOpenSettings,
   onReturnToMenu,
@@ -48,9 +50,11 @@ export default function SceneNav({
           <button className="scene-nav-menu-btn" onClick={onOpenSettings}>
             Options
           </button>
-          <button className="scene-nav-menu-btn" onClick={onReturnToMenu}>
-            ← Main Menu
-          </button>
+          {!hideMenuButton && onReturnToMenu && (
+            <button className="scene-nav-menu-btn" onClick={onReturnToMenu}>
+              ← Main Menu
+            </button>
+          )}
         </div>
       </div>
     </div>

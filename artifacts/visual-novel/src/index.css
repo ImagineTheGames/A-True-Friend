@@ -635,6 +635,13 @@ body {
   border-color: rgba(0,255,136,0.4);
 }
 
+.menu-page-nav-btn {
+  position: absolute;
+  top: max(1rem, env(safe-area-inset-top, 1rem));
+  left: 1rem;
+  z-index: 20;
+}
+
 .nav-toggle-icon {
   line-height: 1;
 }

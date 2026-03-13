@@ -42,6 +42,8 @@ export default function App() {
         <SceneSelect
           scenes={story}
           completedScenes={completedScenes}
+          settings={settings}
+          onSettingsChange={updateSettings}
           onSelect={(scene) => handleSelectScene(story.indexOf(scene))}
         />
       )}

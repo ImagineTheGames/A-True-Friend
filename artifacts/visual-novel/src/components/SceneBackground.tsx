@@ -2,7 +2,7 @@ interface Props {
   background: string;
 }
 
-const backgrounds: Record<string, { gradient: string; label: string }> = {
+export const backgroundData: Record<string, { gradient: string; label: string }> = {
   "bedroom-night": {
     gradient: "linear-gradient(160deg, #0a0a1a 0%, #1a1a3e 40%, #0d1b2a 100%)",
     label: "Bedroom — Late Night",
@@ -21,21 +21,14 @@ const backgrounds: Record<string, { gradient: string; label: string }> = {
   },
 };
 
-const fallback = {
-  gradient: "linear-gradient(160deg, #1a1a2e 0%, #16213e 100%)",
-  label: "",
-};
+export function getBackgroundLabel(background: string): string {
+  return backgroundData[background]?.label ?? "";
+}
 
 export default function SceneBackground({ background }: Props) {
-  const bg = backgrounds[background] ?? fallback;
+  const bg = backgroundData[background] ?? { gradient: "linear-gradient(160deg, #1a1a2e 0%, #16213e 100%)" };
   return (
-    <div
-      className="scene-background"
-      style={{ background: bg.gradient }}
-    >
-      {bg.label && (
-        <div className="scene-location-tag">{bg.label}</div>
-      )}
+    <div className="scene-background" style={{ background: bg.gradient }}>
       <div className="bg-grid" />
       <div className="bg-vignette" />
     </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Scene, DialogueLine, AiExpression } from "../data/types";
-import SceneBackground from "../components/SceneBackground";
+import SceneBackground, { getBackgroundLabel } from "../components/SceneBackground";
 import HumanCharacter from "../components/HumanCharacter";
 import AiCharacter from "../components/AiCharacter";
 import DialogueBox from "../components/DialogueBox";
@@ -33,6 +33,7 @@ export default function GameScene({
   const currentLine: DialogueLine = scene.lines[lineIndex];
   const isLastLine = lineIndex === scene.lines.length - 1;
   const nextScene = allScenes[sceneIndex + 1] ?? null;
+  const locationLabel = getBackgroundLabel(scene.background);
 
   useEffect(() => {
     setLineIndex(0);
@@ -65,15 +66,25 @@ export default function GameScene({
     <div className="game-scene">
       <SceneBackground background={scene.background} />
 
-      <div className="scene-title-chip">{scene.title}</div>
+      <div className="game-top-bar">
+        <button
+          className="nav-toggle-btn"
+          onClick={() => setNavOpen((o) => !o)}
+          aria-label="Scene navigation"
+        >
+          <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
+        </button>
 
-      <button
-        className="nav-toggle-btn"
-        onClick={() => setNavOpen((o) => !o)}
-        aria-label="Scene navigation"
-      >
-        <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
-      </button>
+        <div className="top-bar-center">
+          <span className="scene-title-chip">{scene.title}</span>
+        </div>
+
+        <div className="top-bar-right">
+          {locationLabel && (
+            <span className="scene-location-tag">{locationLabel}</span>
+          )}
+        </div>
+      </div>
 
       {navOpen && (
         <SceneNav

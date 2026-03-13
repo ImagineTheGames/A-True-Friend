@@ -26,13 +26,13 @@ body {
   color: var(--text-main);
   font-family: var(--font-ui);
   overflow: hidden;
-  height: 100vh;
+  height: 100dvh;
   width: 100vw;
 }
 
 .app-root {
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   position: relative;
   overflow: hidden;
 }
@@ -226,31 +226,50 @@ body {
   background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%);
 }
 
-.scene-location-tag {
-  position: absolute;
-  top: 1.2rem;
-  right: 1.5rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.4);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+.game-top-bar {
+  position: relative;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  flex-shrink: 0;
+}
+
+.top-bar-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.top-bar-right {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  flex-shrink: 1;
+}
+
+.scene-location-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
 }
 
 .scene-title-chip {
-  position: absolute;
-  top: 1.2rem;
-  left: 50%;
-  transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: rgba(255,255,255,0.5);
-  letter-spacing: 0.25em;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  z-index: 10;
   background: rgba(0,0,0,0.35);
-  padding: 0.3rem 0.8rem;
+  padding: 0.3rem 0.75rem;
   border-radius: 20px;
   border: 1px solid rgba(255,255,255,0.1);
   white-space: nowrap;
@@ -495,7 +514,7 @@ body {
 .dialogue-box {
   position: relative;
   z-index: 20;
-  margin: 0 1.5rem 1.5rem;
+  margin: 0 1rem calc(1rem + env(safe-area-inset-bottom, 0px)) 1rem;
   padding: 1.25rem 1.5rem 1rem;
   border-radius: 10px;
   cursor: pointer;
@@ -594,15 +613,11 @@ body {
 /* ─── IN-GAME NAV TOGGLE ───────────────────────────────────────── */
 
 .nav-toggle-btn {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 50;
-  background: rgba(0,0,0,0.5);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.12);
   color: var(--text-main);
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -612,6 +627,7 @@ body {
   backdrop-filter: blur(8px);
   padding: 0;
   font-size: 1rem;
+  flex-shrink: 0;
 }
 
 .nav-toggle-btn:hover {

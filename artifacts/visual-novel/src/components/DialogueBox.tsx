@@ -6,13 +6,14 @@ interface Props {
   onComplete: () => void;
   onAdvance: () => void;
   isLastLine: boolean;
+  nextSceneName: string | null;
 }
 
 const HUMAN_NAME = "Kai";
 const AI_NAME = "ARIA";
 const TYPING_SPEED_MS = 28;
 
-export default function DialogueBox({ line, onComplete, onAdvance, isLastLine }: Props) {
+export default function DialogueBox({ line, onComplete, onAdvance, isLastLine, nextSceneName }: Props) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -69,7 +70,11 @@ export default function DialogueBox({ line, onComplete, onAdvance, isLastLine }:
       <div className="dialogue-hint">
         {done ? (
           isLastLine ? (
-            <span className="hint-end">[ END OF SCENE ]</span>
+            nextSceneName ? (
+              <span className="hint-next">▶ Click to continue — {nextSceneName}</span>
+            ) : (
+              <span className="hint-end">[ END ]</span>
+            )
           ) : (
             <span className="hint-next">▶ Click or press Enter to continue</span>
           )

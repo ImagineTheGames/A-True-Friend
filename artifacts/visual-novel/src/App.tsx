@@ -2,6 +2,7 @@ import { useState } from "react";
 import story from "./data/storyIndex";
 import SceneSelect from "./pages/SceneSelect";
 import GameScene from "./pages/GameScene";
+import { useSettings } from "./hooks/useSettings";
 
 type GameState = "menu" | "playing";
 
@@ -9,6 +10,7 @@ export default function App() {
   const [gameState, setGameState] = useState<GameState>("menu");
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [completedScenes, setCompletedScenes] = useState<Set<string>>(new Set());
+  const { settings, updateSettings } = useSettings();
 
   const markComplete = (id: string) =>
     setCompletedScenes((prev) => new Set([...prev, id]));
@@ -21,7 +23,6 @@ export default function App() {
   const handleSceneEnd = () => {
     const current = story[activeIndex];
     if (current) markComplete(current.id);
-
     const nextIndex = activeIndex + 1;
     if (nextIndex < story.length) {
       setActiveIndex(nextIndex);
@@ -33,10 +34,6 @@ export default function App() {
   const handleGoToScene = (index: number) => {
     setActiveIndex(index);
     setGameState("playing");
-  };
-
-  const handleReturnToMenu = () => {
-    setGameState("menu");
   };
 
   return (
@@ -54,9 +51,11 @@ export default function App() {
           sceneIndex={activeIndex}
           allScenes={story}
           completedScenes={completedScenes}
+          settings={settings}
+          onSettingsChange={updateSettings}
           onSceneEnd={handleSceneEnd}
           onGoToScene={handleGoToScene}
-          onReturnToMenu={handleReturnToMenu}
+          onReturnToMenu={() => setGameState("menu")}
         />
       )}
     </div>

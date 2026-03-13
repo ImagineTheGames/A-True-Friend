@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
-import { Scene, DialogueLine, AiExpression } from "../data/types";
+import { Scene, DialogueLine, AiExpression, GameSettings } from "../data/types";
 import SceneBackground, { getBackgroundLabel } from "../components/SceneBackground";
 import HumanCharacter from "../components/HumanCharacter";
 import AiCharacter from "../components/AiCharacter";
 import DialogueBox from "../components/DialogueBox";
 import SceneNav from "../components/SceneNav";
+import SettingsPanel from "../components/SettingsPanel";
 
 interface Props {
   scene: Scene;
   sceneIndex: number;
   allScenes: Scene[];
   completedScenes: Set<string>;
+  settings: GameSettings;
+  onSettingsChange: (patch: Partial<GameSettings>) => void;
   onSceneEnd: () => void;
   onGoToScene: (index: number) => void;
   onReturnToMenu: () => void;
@@ -21,6 +24,8 @@ export default function GameScene({
   sceneIndex,
   allScenes,
   completedScenes,
+  settings,
+  onSettingsChange,
   onSceneEnd,
   onGoToScene,
   onReturnToMenu,
@@ -29,6 +34,7 @@ export default function GameScene({
   const [lineComplete, setLineComplete] = useState(false);
   const [currentExpression, setCurrentExpression] = useState<AiExpression>("neutral");
   const [navOpen, setNavOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const currentLine: DialogueLine = scene.lines[lineIndex];
   const isLastLine = lineIndex === scene.lines.length - 1;
@@ -40,6 +46,7 @@ export default function GameScene({
     setLineComplete(false);
     setCurrentExpression("neutral");
     setNavOpen(false);
+    setSettingsOpen(false);
   }, [scene]);
 
   useEffect(() => {
@@ -69,7 +76,7 @@ export default function GameScene({
       <div className="game-top-bar">
         <button
           className="nav-toggle-btn"
-          onClick={() => setNavOpen((o) => !o)}
+          onClick={() => { setNavOpen((o) => !o); setSettingsOpen(false); }}
           aria-label="Scene navigation"
         >
           <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
@@ -83,6 +90,13 @@ export default function GameScene({
           {locationLabel && (
             <span className="scene-location-tag">{locationLabel}</span>
           )}
+          <button
+            className="settings-toggle-btn"
+            onClick={() => { setSettingsOpen((o) => !o); setNavOpen(false); }}
+            aria-label="Settings"
+          >
+            ⚙
+          </button>
         </div>
       </div>
 
@@ -93,6 +107,14 @@ export default function GameScene({
           completedScenes={completedScenes}
           onSelectScene={(i) => { setNavOpen(false); onGoToScene(i); }}
           onReturnToMenu={() => { setNavOpen(false); onReturnToMenu(); }}
+        />
+      )}
+
+      {settingsOpen && (
+        <SettingsPanel
+          settings={settings}
+          onChange={onSettingsChange}
+          onClose={() => setSettingsOpen(false)}
         />
       )}
 
@@ -119,6 +141,7 @@ export default function GameScene({
         onAdvance={handleAdvance}
         isLastLine={isLastLine}
         nextSceneName={nextScene?.title ?? null}
+        settings={settings}
       />
     </div>
   );

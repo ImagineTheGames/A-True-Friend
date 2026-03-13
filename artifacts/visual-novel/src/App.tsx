@@ -1,6 +1,5 @@
 import { useState } from "react";
 import story from "./data/storyIndex";
-import { Scene } from "./data/types";
 import SceneSelect from "./pages/SceneSelect";
 import GameScene from "./pages/GameScene";
 
@@ -8,20 +7,36 @@ type GameState = "menu" | "playing";
 
 export default function App() {
   const [gameState, setGameState] = useState<GameState>("menu");
-  const [activeScene, setActiveScene] = useState<Scene | null>(null);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
   const [completedScenes, setCompletedScenes] = useState<Set<string>>(new Set());
 
-  const handleSelectScene = (scene: Scene) => {
-    setActiveScene(scene);
+  const markComplete = (id: string) =>
+    setCompletedScenes((prev) => new Set([...prev, id]));
+
+  const handleSelectScene = (index: number) => {
+    setActiveIndex(index);
     setGameState("playing");
   };
 
   const handleSceneEnd = () => {
-    if (activeScene) {
-      setCompletedScenes((prev) => new Set([...prev, activeScene.id]));
+    const current = story[activeIndex];
+    if (current) markComplete(current.id);
+
+    const nextIndex = activeIndex + 1;
+    if (nextIndex < story.length) {
+      setActiveIndex(nextIndex);
+    } else {
+      setGameState("menu");
     }
+  };
+
+  const handleGoToScene = (index: number) => {
+    setActiveIndex(index);
+    setGameState("playing");
+  };
+
+  const handleReturnToMenu = () => {
     setGameState("menu");
-    setActiveScene(null);
   };
 
   return (
@@ -30,11 +45,19 @@ export default function App() {
         <SceneSelect
           scenes={story}
           completedScenes={completedScenes}
-          onSelect={handleSelectScene}
+          onSelect={(scene) => handleSelectScene(story.indexOf(scene))}
         />
       )}
-      {gameState === "playing" && activeScene && (
-        <GameScene scene={activeScene} onSceneEnd={handleSceneEnd} />
+      {gameState === "playing" && (
+        <GameScene
+          scene={story[activeIndex]}
+          sceneIndex={activeIndex}
+          allScenes={story}
+          completedScenes={completedScenes}
+          onSceneEnd={handleSceneEnd}
+          onGoToScene={handleGoToScene}
+          onReturnToMenu={handleReturnToMenu}
+        />
       )}
     </div>
   );

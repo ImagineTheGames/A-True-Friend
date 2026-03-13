@@ -4,24 +4,41 @@ import SceneBackground from "../components/SceneBackground";
 import HumanCharacter from "../components/HumanCharacter";
 import AiCharacter from "../components/AiCharacter";
 import DialogueBox from "../components/DialogueBox";
+import SceneNav from "../components/SceneNav";
 
 interface Props {
   scene: Scene;
+  sceneIndex: number;
+  allScenes: Scene[];
+  completedScenes: Set<string>;
   onSceneEnd: () => void;
+  onGoToScene: (index: number) => void;
+  onReturnToMenu: () => void;
 }
 
-export default function GameScene({ scene, onSceneEnd }: Props) {
+export default function GameScene({
+  scene,
+  sceneIndex,
+  allScenes,
+  completedScenes,
+  onSceneEnd,
+  onGoToScene,
+  onReturnToMenu,
+}: Props) {
   const [lineIndex, setLineIndex] = useState(0);
   const [lineComplete, setLineComplete] = useState(false);
   const [currentExpression, setCurrentExpression] = useState<AiExpression>("neutral");
+  const [navOpen, setNavOpen] = useState(false);
 
   const currentLine: DialogueLine = scene.lines[lineIndex];
   const isLastLine = lineIndex === scene.lines.length - 1;
+  const nextScene = allScenes[sceneIndex + 1] ?? null;
 
   useEffect(() => {
     setLineIndex(0);
     setLineComplete(false);
     setCurrentExpression("neutral");
+    setNavOpen(false);
   }, [scene]);
 
   useEffect(() => {
@@ -30,9 +47,7 @@ export default function GameScene({ scene, onSceneEnd }: Props) {
     }
   }, [currentLine]);
 
-  const handleLineComplete = () => {
-    setLineComplete(true);
-  };
+  const handleLineComplete = () => setLineComplete(true);
 
   const handleAdvance = () => {
     if (isLastLine) {
@@ -52,12 +67,27 @@ export default function GameScene({ scene, onSceneEnd }: Props) {
 
       <div className="scene-title-chip">{scene.title}</div>
 
+      <button
+        className="nav-toggle-btn"
+        onClick={() => setNavOpen((o) => !o)}
+        aria-label="Scene navigation"
+      >
+        <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
+      </button>
+
+      {navOpen && (
+        <SceneNav
+          scenes={allScenes}
+          currentIndex={sceneIndex}
+          completedScenes={completedScenes}
+          onSelectScene={(i) => { setNavOpen(false); onGoToScene(i); }}
+          onReturnToMenu={() => { setNavOpen(false); onReturnToMenu(); }}
+        />
+      )}
+
       <div className="characters-stage">
         <div className="character-slot left">
-          <HumanCharacter
-            isSpeaking={humanSpeaking}
-            isActive={currentLine.speaker === "human"}
-          />
+          <HumanCharacter isSpeaking={humanSpeaking} isActive={currentLine.speaker === "human"} />
         </div>
 
         <div className="stage-divider" />
@@ -77,6 +107,7 @@ export default function GameScene({ scene, onSceneEnd }: Props) {
         onComplete={handleLineComplete}
         onAdvance={handleAdvance}
         isLastLine={isLastLine}
+        nextSceneName={nextScene?.title ?? null}
       />
     </div>
   );

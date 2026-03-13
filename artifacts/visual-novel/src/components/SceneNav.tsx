@@ -26,20 +26,17 @@ export default function SceneNav({
           {scenes.map((scene, i) => {
             const isCurrent = i === currentIndex;
             const isDone = completedScenes.has(scene.id);
-            const isUnlocked = i === 0 || completedScenes.has(scenes[i - 1].id) || isDone || isCurrent;
 
             return (
               <button
                 key={scene.id}
-                className={`scene-nav-item ${isCurrent ? "current" : ""} ${isDone ? "done" : ""} ${!isUnlocked ? "locked" : ""}`}
-                onClick={() => isUnlocked && onSelectScene(i)}
-                disabled={!isUnlocked}
+                className={`scene-nav-item ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}
+                onClick={() => onSelectScene(i)}
               >
                 <span className="snav-num">{String(i + 1).padStart(2, "0")}</span>
                 <span className="snav-name">{scene.title}</span>
                 {isCurrent && <span className="snav-badge current-badge">▶ Now</span>}
                 {isDone && !isCurrent && <span className="snav-badge done-badge">✓</span>}
-                {!isUnlocked && <span className="snav-badge lock-badge">🔒</span>}
               </button>
             );
           })}

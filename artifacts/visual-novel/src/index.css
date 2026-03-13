@@ -1,0 +1,608 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Share+Tech+Mono&family=Cinzel:wght@600&display=swap');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --ai-green: #00ff88;
+  --ai-green-dim: #00cc6a;
+  --ai-green-glow: rgba(0,255,136,0.3);
+  --human-blue: #6ec6ff;
+  --human-blue-dim: #4aabf0;
+  --accent-purple: #c084fc;
+  --bg-dark: #0a0a14;
+  --text-main: #e8e8f0;
+  --text-dim: #8888aa;
+  --font-ui: 'Noto Sans JP', sans-serif;
+  --font-mono: 'Share Tech Mono', monospace;
+  --font-title: 'Cinzel', serif;
+}
+
+body {
+  background: var(--bg-dark);
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+}
+
+.app-root {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ─── SCENE SELECT ─────────────────────────────────────────────── */
+
+.scene-select-page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.scene-select-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(96,0,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 50%, rgba(0,200,120,0.10) 0%, transparent 60%),
+    linear-gradient(180deg, #06060f 0%, #0d0d24 50%, #060610 100%);
+}
+
+.scene-select-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(100,100,200,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100,100,200,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.scene-select-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 520px;
+  padding: 2rem 1rem;
+}
+
+.title-block {
+  text-align: center;
+}
+
+.game-title {
+  font-family: var(--font-title);
+  font-size: clamp(3.5rem, 10vw, 6rem);
+  letter-spacing: 0.2em;
+  background: linear-gradient(135deg, var(--ai-green) 0%, var(--accent-purple) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 30px rgba(0,255,136,0.4));
+}
+
+.game-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  letter-spacing: 0.2em;
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+}
+
+.scene-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.scene-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--ai-green);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.scene-card.unlocked:hover {
+  background: rgba(0,255,136,0.06);
+  border-color: rgba(0,255,136,0.3);
+  transform: translateX(4px);
+}
+
+.scene-card.unlocked:hover::before {
+  opacity: 1;
+}
+
+.scene-card.done {
+  border-color: rgba(0,255,136,0.2);
+}
+
+.scene-card.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.scene-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ai-green);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.scene-name {
+  flex: 1;
+  font-weight: 500;
+}
+
+.scene-check {
+  color: var(--ai-green);
+  font-size: 0.9rem;
+}
+
+.scene-lock {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.scene-hint {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+/* ─── GAME SCENE ───────────────────────────────────────────────── */
+
+.game-scene {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.scene-background {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: background 1.2s ease;
+}
+
+.bg-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.bg-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.65) 100%);
+}
+
+.scene-location-tag {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  z-index: 10;
+}
+
+.scene-title-chip {
+  position: absolute;
+  top: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  z-index: 10;
+  background: rgba(0,0,0,0.35);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  white-space: nowrap;
+}
+
+/* ─── CHARACTERS STAGE ─────────────────────────────────────────── */
+
+.characters-stage {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;
+  padding: 0 2rem 0.5rem;
+  min-height: 0;
+}
+
+.character-slot {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  max-width: 45%;
+}
+
+.character-slot.left {
+  justify-content: flex-end;
+  padding-right: 1.5rem;
+}
+
+.character-slot.right {
+  justify-content: flex-start;
+  padding-left: 1.5rem;
+}
+
+.stage-divider {
+  width: 1px;
+  height: 60%;
+  background: linear-gradient(to top, rgba(255,255,255,0.15), transparent);
+  flex-shrink: 0;
+  align-self: flex-end;
+  margin-bottom: 1rem;
+}
+
+/* ─── HUMAN CHARACTER ──────────────────────────────────────────── */
+
+.human-character {
+  transition: opacity 0.3s, transform 0.3s, filter 0.3s;
+}
+
+.human-character.inactive {
+  opacity: 0.45;
+  filter: saturate(0.4) brightness(0.7);
+  transform: scale(0.96) translateY(4px);
+}
+
+.human-character.active {
+  opacity: 1;
+  filter: none;
+  transform: scale(1) translateY(0);
+}
+
+.character-svg {
+  width: clamp(120px, 18vw, 200px);
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0,0,0,0.6));
+}
+
+/* ─── AI CHARACTER / MONITOR ───────────────────────────────────── */
+
+.ai-character {
+  transition: opacity 0.3s, transform 0.3s, filter 0.3s;
+}
+
+.ai-character.inactive {
+  opacity: 0.45;
+  filter: saturate(0.5) brightness(0.7);
+  transform: scale(0.96) translateY(4px);
+}
+
+.ai-character.active {
+  opacity: 1;
+  filter: none;
+  transform: scale(1) translateY(0);
+}
+
+.monitor-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.monitor-shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.monitor-bezel {
+  background: linear-gradient(135deg, #2a2a3a, #1a1a28);
+  border: 2px solid #3a3a4e;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow:
+    0 0 0 1px #0a0a14,
+    0 8px 32px rgba(0,0,0,0.8),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  width: clamp(180px, 22vw, 280px);
+}
+
+.monitor-screen {
+  background: #020c06;
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  position: relative;
+  border: 1px solid #0a2a16;
+}
+
+.screen-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: background 0.4s;
+}
+
+.screen-content.screen-speaking {
+  background: rgba(0,255,136,0.03);
+}
+
+.screen-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.12) 2px,
+    rgba(0,0,0,0.12) 4px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+.ai-face-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  z-index: 5;
+  padding: 0.5rem;
+}
+
+.ai-system-text {
+  font-family: var(--font-mono);
+  font-size: clamp(0.5rem, 1.2vw, 0.65rem);
+  color: var(--ai-green-dim);
+  letter-spacing: 0.15em;
+  opacity: 0.7;
+}
+
+.ascii-face-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ascii-face {
+  font-family: var(--font-mono);
+  font-size: clamp(1.1rem, 2.5vw, 1.7rem);
+  color: var(--ai-green);
+  text-shadow: 0 0 12px var(--ai-green-glow), 0 0 24px var(--ai-green-glow);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  transition: all 0.3s ease;
+}
+
+.ai-status-bar {
+  font-family: var(--font-mono);
+  font-size: clamp(0.45rem, 1vw, 0.6rem);
+  color: var(--ai-green-dim);
+  letter-spacing: 0.2em;
+  opacity: 0.6;
+}
+
+.ai-status-bar.blinking {
+  animation: blink 0.9s step-end infinite;
+  opacity: 0.9;
+}
+
+@keyframes blink {
+  50% { opacity: 0.2; }
+}
+
+.monitor-neck {
+  width: 20px;
+  height: 18px;
+  background: linear-gradient(180deg, #2a2a3a, #1e1e2c);
+  border-left: 1px solid #3a3a4e;
+  border-right: 1px solid #3a3a4e;
+}
+
+.monitor-base {
+  width: 70px;
+  height: 8px;
+  background: linear-gradient(135deg, #2a2a3a, #1a1a28);
+  border-radius: 4px;
+  border: 1px solid #3a3a4e;
+}
+
+.monitor-keyboard {
+  margin-top: 6px;
+  width: clamp(130px, 16vw, 200px);
+  height: 18px;
+  background: linear-gradient(135deg, #22222e, #1a1a26);
+  border-radius: 4px;
+  border: 1px solid #33334a;
+  position: relative;
+  overflow: hidden;
+}
+
+.monitor-keyboard::after {
+  content: "";
+  position: absolute;
+  inset: 3px 5px;
+  background: repeating-linear-gradient(
+    90deg,
+    #2a2a3a 0px, #2a2a3a 6px,
+    transparent 6px, transparent 8px
+  );
+  border-radius: 2px;
+  opacity: 0.4;
+}
+
+/* ─── DIALOGUE BOX ─────────────────────────────────────────────── */
+
+.dialogue-box {
+  position: relative;
+  z-index: 20;
+  margin: 0 1.5rem 1.5rem;
+  padding: 1.25rem 1.5rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+  min-height: 130px;
+  transition: border-color 0.3s;
+  backdrop-filter: blur(12px);
+}
+
+.dialogue-human {
+  background: rgba(10, 20, 40, 0.88);
+  border: 1px solid rgba(110, 198, 255, 0.35);
+  box-shadow: 0 0 30px rgba(110, 198, 255, 0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.dialogue-ai {
+  background: rgba(4, 20, 12, 0.90);
+  border: 1px solid rgba(0, 255, 136, 0.35);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.1), inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.dialogue-name-tag {
+  margin-bottom: 0.6rem;
+}
+
+.name-badge {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  padding: 0.15rem 0.6rem;
+  border-radius: 4px;
+}
+
+.name-human {
+  color: var(--human-blue);
+  background: rgba(110, 198, 255, 0.1);
+  border: 1px solid rgba(110, 198, 255, 0.25);
+}
+
+.name-ai {
+  color: var(--ai-green);
+  background: rgba(0, 255, 136, 0.08);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.dialogue-text {
+  font-family: var(--font-ui);
+  font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+  line-height: 1.65;
+  color: var(--text-main);
+  min-height: 2.5em;
+}
+
+.typing-cursor {
+  animation: blink 0.7s step-end infinite;
+  color: var(--ai-green);
+  font-weight: bold;
+}
+
+.dialogue-hint {
+  margin-top: 0.7rem;
+  text-align: right;
+}
+
+.hint-next,
+.hint-end,
+.hint-skip {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.hint-next {
+  color: var(--text-dim);
+  animation: pulse-text 1.8s ease-in-out infinite;
+}
+
+.hint-end {
+  color: var(--accent-purple);
+  animation: pulse-text 1.8s ease-in-out infinite;
+}
+
+.hint-skip {
+  color: rgba(255,255,255,0.2);
+}
+
+@keyframes pulse-text {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ─── RESPONSIVE ───────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .character-slot.left {
+    padding-right: 0.5rem;
+  }
+  .character-slot.right {
+    padding-left: 0.5rem;
+  }
+  .dialogue-box {
+    margin: 0 0.75rem 1rem;
+    padding: 1rem 1rem 0.75rem;
+    min-height: 110px;
+  }
+}

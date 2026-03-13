@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Visual Novel"
+version = "1.0.0"
+id = "artifacts/visual-novel"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+localPort = 24435
+name = "web"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/visual-novel run dev"
+
+[services.env]
+PORT = "24435"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/visual-novel", "run", "build"]
+publicDir = "artifacts/visual-novel/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"

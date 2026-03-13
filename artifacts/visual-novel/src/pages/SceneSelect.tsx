@@ -18,19 +18,16 @@ export default function SceneSelect({ scenes, completedScenes, onSelect }: Props
 
         <div className="scene-list">
           {scenes.map((scene, i) => {
-            const isUnlocked = i === 0 || completedScenes.has(scenes[i - 1].id);
             const isDone = completedScenes.has(scene.id);
             return (
               <button
                 key={scene.id}
-                className={`scene-card ${isUnlocked ? "unlocked" : "locked"} ${isDone ? "done" : ""}`}
-                onClick={() => isUnlocked && onSelect(scene)}
-                disabled={!isUnlocked}
+                className={`scene-card unlocked ${isDone ? "done" : ""}`}
+                onClick={() => onSelect(scene)}
               >
                 <span className="scene-num">Scene {String(i + 1).padStart(2, "0")}</span>
                 <span className="scene-name">{scene.title}</span>
                 {isDone && <span className="scene-check">✓</span>}
-                {!isUnlocked && <span className="scene-lock">🔒</span>}
               </button>
             );
           })}

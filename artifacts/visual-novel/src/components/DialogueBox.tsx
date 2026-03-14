@@ -46,6 +46,7 @@ export default function DialogueBox({
   const autoTotalRef = useRef(0);
   const autoElapsedRef = useRef(0);
   const lastSoundRef = useRef(0);
+  const mutedUntilRef = useRef(0);
   const playClick = useTypingSound(settings.soundEnabled);
 
   const speedCfg = SPEED_CONFIG[settings.readingSpeed];
@@ -88,7 +89,7 @@ export default function DialogueBox({
       setDisplayed(line.text.slice(0, i));
       const ch = line.text[i - 1];
       const now = Date.now();
-      if (ch && /\S/.test(ch) && now - lastSoundRef.current >= 55) {
+      if (ch && /\S/.test(ch) && now - lastSoundRef.current >= 55 && now >= mutedUntilRef.current) {
         playClick();
         lastSoundRef.current = now;
       }
@@ -114,6 +115,7 @@ export default function DialogueBox({
 
   const handleClick = () => {
     if (!done) {
+      mutedUntilRef.current = Date.now() + 200;
       if (intervalRef.current) clearInterval(intervalRef.current);
       setDisplayed(line.text);
       setDone(true);

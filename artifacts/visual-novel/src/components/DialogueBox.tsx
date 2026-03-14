@@ -45,6 +45,7 @@ export default function DialogueBox({
   const autoTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const autoTotalRef = useRef(0);
   const autoElapsedRef = useRef(0);
+  const lastSoundRef = useRef(0);
   const playClick = useTypingSound(settings.soundEnabled);
 
   const speedCfg = SPEED_CONFIG[settings.readingSpeed];
@@ -80,11 +81,17 @@ export default function DialogueBox({
     clearAutoTimer();
     setAutoProgress(0);
 
+    lastSoundRef.current = 0;
     let i = 0;
     intervalRef.current = setInterval(() => {
       i++;
       setDisplayed(line.text.slice(0, i));
-      if (i % 1 === 0) playClick();
+      const ch = line.text[i - 1];
+      const now = Date.now();
+      if (ch && /\S/.test(ch) && now - lastSoundRef.current >= 55) {
+        playClick();
+        lastSoundRef.current = now;
+      }
       if (i >= line.text.length) {
         clearInterval(intervalRef.current!);
         setDone(true);

@@ -263,6 +263,7 @@ body {
 }
 
 .scene-title-chip {
+  display: block;
   font-family: var(--font-mono);
   font-size: 0.65rem;
   color: rgba(255,255,255,0.55);
@@ -275,8 +276,8 @@ body {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 100%;
   min-width: 0;
+  max-width: calc(100vw - 120px);
 }
 
 /* ─── CHARACTERS STAGE ─────────────────────────────────────────── */
@@ -1092,18 +1093,26 @@ body {
 
 /* Landscape / wide screens (16:9, 16:10, tablets sideways) */
 @media (min-aspect-ratio: 4/3) {
-  /* Size characters by viewport height so they can't overflow */
+  /*
+   * Switch characters from vw-based to vh-based width.
+   * Human SVG viewBox is 160×320 (1:2), so width:height = 1:2.
+   * At 720px screen: 20vh = 144px wide → ~288px tall. Fits in ~520px stage.
+   */
   .character-svg {
-    width: auto;
-    max-height: clamp(160px, 46vh, 300px);
+    width: clamp(80px, 20vh, 160px);
+    height: auto;
   }
 
+  /*
+   * Monitor bezel: vh-based so it doesn't overflow the stage height.
+   * At 720px: 22vh ≈ 158px wide.
+   */
   .monitor-bezel {
-    width: clamp(110px, 24vh, 200px);
+    width: clamp(110px, 22vh, 195px);
   }
 
   .monitor-keyboard {
-    width: clamp(80px, 18vh, 150px);
+    width: clamp(80px, 16vh, 145px);
   }
 
   /* Compact stage padding */

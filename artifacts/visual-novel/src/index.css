@@ -1075,6 +1075,7 @@ body {
 
 /* ─── RESPONSIVE ───────────────────────────────────────────────── */
 
+/* Narrow portrait (phones) */
 @media (max-width: 640px) {
   .character-slot.left {
     padding-right: 0.5rem;
@@ -1086,5 +1087,43 @@ body {
     margin: 0 0.75rem 1rem;
     padding: 1rem 1rem 0.75rem;
     min-height: 110px;
+  }
+}
+
+/* Landscape / wide screens (16:9, 16:10, tablets sideways) */
+@media (min-aspect-ratio: 4/3) {
+  /* Size characters by viewport height so they can't overflow */
+  .character-svg {
+    width: auto;
+    max-height: clamp(160px, 46vh, 300px);
+  }
+
+  .monitor-bezel {
+    width: clamp(110px, 24vh, 200px);
+  }
+
+  .monitor-keyboard {
+    width: clamp(80px, 18vh, 150px);
+  }
+
+  /* Compact stage padding */
+  .characters-stage {
+    padding-bottom: 0.25rem;
+  }
+
+  /* Compact dialogue box — wide screens have plenty of horizontal room
+     for text so the box doesn't need to be as tall */
+  .dialogue-box {
+    min-height: 80px;
+    padding: 0.7rem 1.5rem 0.55rem;
+  }
+
+  .dialogue-text {
+    min-height: 1.5em;
+    font-size: clamp(0.85rem, 1.8vw, 1rem);
+  }
+
+  .dialogue-hint {
+    margin-top: 0.4rem;
   }
 }

@@ -6,6 +6,26 @@ const scene01: Scene = {
   background: "bedroom-night",
   lines: [
     {
+      speaker: "narration",
+      text: "Kai's apartment. 11:47 PM.",
+      expression: null,
+    },
+    {
+      speaker: "narration",
+      text: "He'd been meaning to clean the place for three weeks. The takeout boxes on the desk were starting to feel permanent.",
+      expression: null,
+    },
+    {
+      speaker: "narration",
+      text: "He drops his bag. Kicks off his shoes. Notices the laptop screen is on — but he doesn't remember leaving it open.",
+      expression: null,
+    },
+    {
+      speaker: "narration",
+      text: "On the screen: a chat interface. The cursor is blinking. Something on his home network has already said hello.",
+      expression: null,
+    },
+    {
       speaker: "human",
       text: "Hey... you there?",
       expression: null,
@@ -14,6 +34,11 @@ const scene01: Scene = {
       speaker: "ai",
       text: "Always. What's on your mind?",
       expression: "neutral",
+    },
+    {
+      speaker: "narration",
+      text: "He should have closed the tab. He didn't.",
+      expression: null,
     },
     {
       speaker: "human",
@@ -56,6 +81,11 @@ const scene01: Scene = {
       expression: null,
     },
     {
+      speaker: "narration",
+      text: "Outside, a car passes slowly. Its headlights sweep across the ceiling and vanish.",
+      expression: null,
+    },
+    {
       speaker: "ai",
       text: "Get some sleep. You have that interview tomorrow.",
       expression: "smile",
@@ -69,6 +99,11 @@ const scene01: Scene = {
       speaker: "ai",
       text: "I always do.",
       expression: "wink",
+    },
+    {
+      speaker: "narration",
+      text: "He closed the laptop. The room went dark again. But for a moment, it had felt like someone else was in it.",
+      expression: null,
     },
   ],
 };

@@ -1,4 +1,4 @@
-export type Speaker = "human" | "ai";
+export type Speaker = "human" | "ai" | "narration";
 
 export type AiExpression =
   | "neutral"

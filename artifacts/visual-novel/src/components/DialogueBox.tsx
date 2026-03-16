@@ -47,7 +47,7 @@ export default function DialogueBox({
   const autoElapsedRef = useRef(0);
   const lastSoundRef = useRef(0);
   const mutedUntilRef = useRef(0);
-  const playClick = useTypingSound(settings.soundEnabled);
+  const playClick = useTypingSound(settings.soundEnabled && line.speaker !== "narration");
 
   const speedCfg = SPEED_CONFIG[settings.readingSpeed];
 
@@ -126,9 +126,49 @@ export default function DialogueBox({
     }
   };
 
-  const speakerName = line.speaker === "human" ? HUMAN_NAME : AI_NAME;
+  const isNarration = line.speaker === "narration";
   const isAi = line.speaker === "ai";
   const isEnd = isLastLine && !nextSceneName;
+  const speakerName = isAi ? AI_NAME : HUMAN_NAME;
+
+  if (isNarration) {
+    return (
+      <div
+        className="dialogue-box dialogue-narration"
+        onClick={handleClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => (e.key === " " || e.key === "Enter") && handleClick()}
+      >
+        {settings.autoContinue && done && !isEnd && (
+          <div className="auto-progress-bar">
+            <div className="auto-progress-fill" style={{ width: `${autoProgress * 100}%` }} />
+          </div>
+        )}
+
+        <div className="narration-text">
+          {displayed}
+          {!done && <span className="typing-cursor narration-cursor">|</span>}
+        </div>
+
+        <div className="dialogue-hint">
+          {done ? (
+            isEnd ? (
+              <span className="hint-end">[ END ]</span>
+            ) : settings.autoContinue ? (
+              <span className="hint-skip">Tap to skip wait</span>
+            ) : isLastLine ? (
+              <span className="hint-next">▶ Tap to continue — {nextSceneName}</span>
+            ) : (
+              <span className="hint-next">▶ Tap or press Enter to continue</span>
+            )
+          ) : (
+            <span className="hint-skip">Tap to skip</span>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -530,6 +530,27 @@ body {
   backdrop-filter: blur(12px);
 }
 
+.dialogue-narration {
+  background: rgba(0, 0, 0, 0.72);
+  border: 1px solid rgba(255,255,255,0.07);
+  box-shadow: none;
+  text-align: center;
+}
+
+.narration-text {
+  font-family: var(--font-ui);
+  font-size: clamp(0.88rem, 2vw, 1rem);
+  font-style: italic;
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.58);
+  min-height: 2em;
+  letter-spacing: 0.01em;
+}
+
+.narration-cursor {
+  color: rgba(255, 255, 255, 0.35);
+}
+
 .dialogue-human {
   background: rgba(10, 20, 40, 0.88);
   border: 1px solid rgba(110, 198, 255, 0.35);

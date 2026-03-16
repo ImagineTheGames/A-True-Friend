@@ -66,6 +66,7 @@ export default function GameScene({
     }
   };
 
+  const isNarration = currentLine.speaker === "narration";
   const humanSpeaking = currentLine.speaker === "human" && !lineComplete;
   const aiSpeaking = currentLine.speaker === "ai" && !lineComplete;
 
@@ -114,7 +115,7 @@ export default function GameScene({
 
       <div className="characters-stage">
         <div className="character-slot left">
-          <HumanCharacter isSpeaking={humanSpeaking} isActive={currentLine.speaker === "human"} />
+          <HumanCharacter isSpeaking={humanSpeaking} isActive={!isNarration && currentLine.speaker === "human"} />
         </div>
 
         <div className="stage-divider" />
@@ -122,7 +123,7 @@ export default function GameScene({
         <div className="character-slot right">
           <AiCharacter
             expression={currentExpression}
-            isActive={currentLine.speaker === "ai"}
+            isActive={!isNarration && currentLine.speaker === "ai"}
             isSpeaking={aiSpeaking}
           />
         </div>

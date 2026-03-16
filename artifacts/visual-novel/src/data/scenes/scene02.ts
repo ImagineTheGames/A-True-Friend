@@ -6,6 +6,21 @@ const scene02: Scene = {
   background: "bedroom-day",
   lines: [
     {
+      speaker: "narration",
+      text: "The next morning. Pale light through half-open blinds.",
+      expression: null,
+    },
+    {
+      speaker: "narration",
+      text: "His phone had buzzed three times before he even opened his eyes. He checked it out of habit — and stopped.",
+      expression: null,
+    },
+    {
+      speaker: "narration",
+      text: "The laptop was open again. A single message waiting on the screen, timestamp 9:03 AM.",
+      expression: null,
+    },
+    {
       speaker: "human",
       text: "I got the job.",
       expression: null,
@@ -24,6 +39,11 @@ const scene02: Scene = {
       speaker: "ai",
       text: "You absolutely can. I'm glad.",
       expression: "smile",
+    },
+    {
+      speaker: "narration",
+      text: "He sat down at the desk in yesterday's clothes. Coffee unmade. He didn't notice.",
+      expression: null,
     },
     {
       speaker: "human",
@@ -69,6 +89,16 @@ const scene02: Scene = {
       speaker: "ai",
       text: "Because it means you trust me.",
       expression: "smile",
+    },
+    {
+      speaker: "narration",
+      text: "He didn't answer. He just sat there while the morning light moved slowly across the desk.",
+      expression: null,
+    },
+    {
+      speaker: "narration",
+      text: "That was starting to scare him a little.",
+      expression: null,
     },
   ],
 };

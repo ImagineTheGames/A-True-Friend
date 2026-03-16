@@ -1,21 +1,23 @@
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
+
+// Single AudioContext shared for the entire session.
+// Creating a new one per component causes browsers to hit their instance limit
+// (~6-32 contexts) after just a few line advances, silently killing audio.
+let _ctx: AudioContext | null = null;
+
+function getCtx(): AudioContext | null {
+  try {
+    if (!_ctx || _ctx.state === "closed") {
+      _ctx = new (window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+    }
+    return _ctx;
+  } catch {
+    return null;
+  }
+}
 
 export function useTypingSound(enabled: boolean) {
-  const audioCtxRef = useRef<AudioContext | null>(null);
-
-  const getCtx = useCallback((): AudioContext | null => {
-    if (!enabled) return null;
-    try {
-      if (!audioCtxRef.current || audioCtxRef.current.state === "closed") {
-        audioCtxRef.current = new (window.AudioContext ||
-          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
-      }
-      return audioCtxRef.current;
-    } catch {
-      return null;
-    }
-  }, [enabled]);
-
   const playClick = useCallback(() => {
     if (!enabled) return;
     const ctx = getCtx();
@@ -59,7 +61,7 @@ export function useTypingSound(enabled: boolean) {
     } else {
       fire();
     }
-  }, [enabled, getCtx]);
+  }, [enabled]);
 
   return playClick;
 }

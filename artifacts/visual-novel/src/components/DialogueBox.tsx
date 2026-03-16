@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DialogueLine, GameSettings, SPEED_CONFIG } from "../data/types";
-import { useTypingSound } from "../hooks/useTypingSound";
+import { useTypingSound, useNarrationSound } from "../hooks/useTypingSound";
 
 interface Props {
   line: DialogueLine;
@@ -47,7 +47,11 @@ export default function DialogueBox({
   const autoElapsedRef = useRef(0);
   const lastSoundRef = useRef(0);
   const mutedUntilRef = useRef(0);
-  const playClick = useTypingSound(settings.soundEnabled && line.speaker !== "narration");
+  const isNarrationLine = line.speaker === "narration";
+  const playClick = useTypingSound(settings.soundEnabled && !isNarrationLine);
+  const playBlip  = useNarrationSound(settings.soundEnabled && isNarrationLine);
+  const playSound = isNarrationLine ? playBlip : playClick;
+  const soundThrottle = isNarrationLine ? 80 : 55;
 
   const speedCfg = SPEED_CONFIG[settings.readingSpeed];
 
@@ -89,8 +93,8 @@ export default function DialogueBox({
       setDisplayed(line.text.slice(0, i));
       const ch = line.text[i - 1];
       const now = Date.now();
-      if (ch && /\S/.test(ch) && now - lastSoundRef.current >= 55 && now >= mutedUntilRef.current) {
-        playClick();
+      if (ch && /\S/.test(ch) && now - lastSoundRef.current >= soundThrottle && now >= mutedUntilRef.current) {
+        playSound();
         lastSoundRef.current = now;
       }
       if (i >= line.text.length) {
@@ -126,12 +130,11 @@ export default function DialogueBox({
     }
   };
 
-  const isNarration = line.speaker === "narration";
   const isAi = line.speaker === "ai";
   const isEnd = isLastLine && !nextSceneName;
   const speakerName = isAi ? AI_NAME : HUMAN_NAME;
 
-  if (isNarration) {
+  if (isNarrationLine) {
     return (
       <div
         className="dialogue-box dialogue-narration"

@@ -17,6 +17,15 @@ function getCtx(): AudioContext | null {
   }
 }
 
+function resumeAndFire(ctx: AudioContext, fire: () => void) {
+  if (ctx.state === "suspended") {
+    ctx.resume().then(fire).catch(() => {});
+  } else {
+    fire();
+  }
+}
+
+// ── Keyboard-click sound for dialogue ──────────────────────────────
 export function useTypingSound(enabled: boolean) {
   const playClick = useCallback(() => {
     if (!enabled) return;
@@ -56,12 +65,57 @@ export function useTypingSound(enabled: boolean) {
       }
     };
 
-    if (ctx.state === "suspended") {
-      ctx.resume().then(fire).catch(() => {});
-    } else {
-      fire();
-    }
+    resumeAndFire(ctx, fire);
   }, [enabled]);
 
   return playClick;
+}
+
+// ── Soft digital-sine blip for narration ───────────────────────────
+// A short downward sine sweep (300 → 220 Hz) — digital but calm,
+// nothing like the keyboard noise used for dialogue.
+export function useNarrationSound(enabled: boolean) {
+  const playBlip = useCallback(() => {
+    if (!enabled) return;
+    const ctx = getCtx();
+    if (!ctx) return;
+
+    const fire = () => {
+      if (ctx.state !== "running") return;
+      try {
+        const now = ctx.currentTime;
+        const baseFreq = 280 + Math.random() * 60; // 280–340 Hz
+
+        const osc = ctx.createOscillator();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(baseFreq, now);
+        // Gentle downward pitch drift — gives a "settling" digital feel
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.72, now + 0.075);
+
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.032, now + 0.004); // soft attack
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085); // smooth decay
+
+        // Low-pass to strip harshness
+        const filter = ctx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.value = 700;
+        filter.Q.value = 0.4;
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.09);
+      } catch {
+        // ignore
+      }
+    };
+
+    resumeAndFire(ctx, fire);
+  }, [enabled]);
+
+  return playBlip;
 }

@@ -1,29 +1,59 @@
-export type Speaker = "human" | "ai" | "narration";
+import type { ComponentType } from "react";
 
-export type AiExpression =
-  | "neutral"
-  | "smile"
-  | "smirk"
-  | "wink"
-  | "thinking"
-  | "curious"
-  | "surprised"
-  | "laughing"
-  | "sad"
-  | "angry"
-  | "sincere"
-  | null;
+// Speaker is now an open string — character ids declared in story.config.ts.
+// "narration" is reserved for narrator lines.
+export type Speaker = string;
+
+// Expression is an open string so any character can use custom expression keys.
+export type Expression = string | null;
+
+// Backward-compat alias — still used by AsciiExpression internally.
+export type AiExpression = Expression;
+
+// Shared props interface all character components must satisfy.
+export interface CharacterProps {
+  isActive: boolean;
+  isSpeaking: boolean;
+  expression?: Expression;
+}
+
+// One entry per character in the story. Defined in story.config.ts.
+export interface CharacterConfig {
+  id: string;
+  name: string;
+  component: ComponentType<CharacterProps>;
+  defaultSide: "left" | "right";
+  styleRole: "human" | "ai";
+}
+
+// Per-scene cast override — lets a scene place characters on non-default sides
+// or show only a subset of the cast.
+export interface CharacterSlot {
+  characterId: string;
+  side: "left" | "right";
+}
+
+// The single config object a fork author edits.
+export interface StoryConfig {
+  title: string;
+  subtitle: string;
+  characters: CharacterConfig[];
+  backgrounds?: Record<string, { gradient: string; label: string }>;
+  theme?: Record<string, string>;
+  defaultSettings?: Partial<GameSettings>;
+}
 
 export interface DialogueLine {
   speaker: Speaker;
   text: string;
-  expression: AiExpression;
+  expression: Expression;
 }
 
 export interface Scene {
   id: string;
   title: string;
   background: string;
+  cast?: CharacterSlot[];
   lines: DialogueLine[];
 }
 

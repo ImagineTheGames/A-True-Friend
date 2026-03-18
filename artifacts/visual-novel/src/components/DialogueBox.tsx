@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { DialogueLine, GameSettings, SPEED_CONFIG } from "../data/types";
 import { useTypingSound, useNarrationSound } from "../hooks/useTypingSound";
 
+interface CharacterEntry {
+  name: string;
+  styleRole: "human" | "ai";
+}
+
 interface Props {
   line: DialogueLine;
   onComplete: () => void;
@@ -9,10 +14,8 @@ interface Props {
   isLastLine: boolean;
   nextSceneName: string | null;
   settings: GameSettings;
+  characterMap: Record<string, CharacterEntry>;
 }
-
-const HUMAN_NAME = "Kai";
-const AI_NAME = "ARIA";
 
 function countSyllables(word: string): number {
   const w = word.toLowerCase().replace(/[^a-z]/g, "");
@@ -37,6 +40,7 @@ export default function DialogueBox({
   isLastLine,
   nextSceneName,
   settings,
+  characterMap,
 }: Props) {
   const [displayed, setDisplayed] = useState("");
   const [done, setDone] = useState(false);
@@ -130,9 +134,10 @@ export default function DialogueBox({
     }
   };
 
-  const isAi = line.speaker === "ai";
+  const charEntry = characterMap[line.speaker];
+  const styleRole = charEntry?.styleRole ?? "human";
+  const speakerName = charEntry?.name ?? line.speaker;
   const isEnd = isLastLine && !nextSceneName;
-  const speakerName = isAi ? AI_NAME : HUMAN_NAME;
 
   if (isNarrationLine) {
     return (
@@ -175,7 +180,7 @@ export default function DialogueBox({
 
   return (
     <div
-      className={`dialogue-box ${isAi ? "dialogue-ai" : "dialogue-human"}`}
+      className={`dialogue-box dialogue-${styleRole}`}
       onClick={handleClick}
       role="button"
       tabIndex={0}
@@ -188,7 +193,7 @@ export default function DialogueBox({
       )}
 
       <div className="dialogue-name-tag">
-        <span className={`name-badge ${isAi ? "name-ai" : "name-human"}`}>
+        <span className={`name-badge name-${styleRole}`}>
           {speakerName}
         </span>
       </div>

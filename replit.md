@@ -38,13 +38,28 @@ artifacts-monorepo/
 
 ## Visual Novel — `artifacts/visual-novel`
 
-A scene-based visual novel engine. Characters: Kai (human, left side) and ARIA (AI on monitor, right side).
+A scene-based visual novel engine designed to be forked. Characters: Kai (human, left side)
+and ARIA (AI on monitor, right side). Built with React + Vite, Web Audio API for sounds.
+
+---
+
+### Fork configuration — `src/data/story.config.ts`
+
+**This is the only file a fork author needs to edit** to create a new story.
+It owns:
+- `title` / `subtitle` — shown on the main menu
+- `characters[]` — cast definition: id, display name, component, default stage side, dialogue style
+- `backgrounds` (optional) — extra scene backgrounds beyond the built-ins
+- `theme` (optional) — CSS custom-property overrides for full re-theming without touching `index.css`
+
+Character `id` values become the `speaker` key used in scene files.
+
+---
 
 ### How to add new scenes
 
-1. Create `artifacts/visual-novel/src/data/scenes/scene0N.ts` following the same pattern as existing scenes.
+1. Create `artifacts/visual-novel/src/data/scenes/scene0N.ts` following the same pattern.
 2. Import it and add it to the array in `artifacts/visual-novel/src/data/storyIndex.ts`.
-3. Scenes are automatically unlocked sequentially (complete scene N to unlock scene N+1).
 
 ### Scene file format
 
@@ -54,17 +69,28 @@ import { Scene } from "../types";
 const sceneXX: Scene = {
   id: "sceneXX",
   title: "Scene Title Here",
-  background: "bedroom-night", // bedroom-night | bedroom-day | cafe | void
+  background: "bedroom-night",  // see backgrounds list below
+  // Optional: override which characters appear and which side they stand on.
+  // Omit to use each character's defaultSide from story.config.ts.
+  cast: [
+    { characterId: "kai",  side: "left" },
+    { characterId: "aria", side: "right" },
+  ],
   lines: [
     {
-      speaker: "human",  // or "ai"
-      text: "What they say.",
-      expression: null,  // only relevant for "ai" speaker
+      speaker: "narration",     // reserved — centered italic, no badge, no typing sound
+      text: "A quiet room.",
+      expression: null,
     },
     {
-      speaker: "ai",
+      speaker: "kai",           // must match a character id in story.config.ts
+      text: "What they say.",
+      expression: null,
+    },
+    {
+      speaker: "aria",
       text: "ARIA's response.",
-      expression: "smile",  // see list below
+      expression: "smile",      // see expression list below
     },
   ],
 };
@@ -72,32 +98,60 @@ const sceneXX: Scene = {
 export default sceneXX;
 ```
 
-### Available AI expressions (ASCII art)
+### Available ARIA expressions (ASCII art)
 
-- `neutral`  → `( -_- )`
-- `smile`    → `( ^_^ )`
-- `smirk`    → `( ¬‿¬ )`
-- `wink`     → `( ^_~ )`
-- `thinking` → `( ._. )?`
-- `curious`  → `( o_O )`
-- `surprised`→ `( O_O )`
-- `laughing` → `( ≧▽≦ )`
-- `sad`      → `( T_T )`
-- `angry`    → `( >_< )`
-- `sincere`  → `( ◕‿◕ )`
+- `neutral`   → `( -_- )`
+- `smile`     → `( ^_^ )`
+- `smirk`     → `( ¬‿¬ )`
+- `wink`      → `( ^_~ )`
+- `thinking`  → `( ._. )?`
+- `curious`   → `( o_O )`
+- `surprised` → `( O_O )`
+- `laughing`  → `( ≧▽≦ )`
+- `sad`       → `( T_T )`
+- `angry`     → `( >_< )`
+- `sincere`   → `( ◕‿◕ )`
 
-### Available backgrounds
+### Built-in backgrounds
 
 - `bedroom-night` — dark blue/indigo late-night room
 - `bedroom-day`   — warm morning light
 - `cafe`          — warm brown café setting
 - `void`          — pure dark abstract
 
-To add a new background, edit `artifacts/visual-novel/src/components/SceneBackground.tsx`.
+To add backgrounds in a fork, add entries to the `backgrounds` map in `story.config.ts`.
+Engine built-ins are always available; config backgrounds are merged on top.
+
+### Audio
+
+- Typing sound: Web Audio API band-pass noise bursts (throttled 55 ms between triggers)
+- Narration sound: soft sine-wave downward sweep blip (throttled 80 ms), separate from typing
+- Both use a module-level singleton AudioContext to avoid browser instance limits
+- Controlled by the `soundEnabled` setting, persisted in localStorage under `aria_settings`
+
+### Key source files
+
+| File | Purpose |
+|------|---------|
+| `src/data/story.config.ts` | **Fork config** — title, cast, backgrounds, theme |
+| `src/data/storyIndex.ts` | Scene registry |
+| `src/data/scenes/scene0N.ts` | Individual scene data |
+| `src/data/types.ts` | All shared TypeScript types |
+| `src/pages/GameScene.tsx` | Scene runtime — dynamic cast, per-character expressions |
+| `src/pages/SceneSelect.tsx` | Main menu |
+| `src/components/DialogueBox.tsx` | Typing animation, sound, auto-continue |
+| `src/components/HumanCharacter.tsx` | SVG character sprite |
+| `src/components/AiCharacter.tsx` | Monitor + ASCII expression display |
+| `src/components/SceneBackground.tsx` | Background renderer (merges built-ins + config) |
+| `src/hooks/useTypingSound.ts` | Typing + narration Web Audio hooks |
+| `src/hooks/useSettings.ts` | Settings with localStorage persistence |
+
+---
 
 ## TypeScript & Composite Projects
 
-Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json` lists all packages as project references.
+Every package extends `tsconfig.base.json` which sets `composite: true`. The root `tsconfig.json`
+lists all packages as project references.
 
 ## Root Scripts
 

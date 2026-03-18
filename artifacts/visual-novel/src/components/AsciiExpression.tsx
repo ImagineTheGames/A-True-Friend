@@ -1,6 +1,6 @@
-import { AiExpression } from "../data/types";
+import type { Expression } from "../data/types";
 
-const expressions: Record<NonNullable<AiExpression>, string> = {
+const expressions: Record<string, string> = {
   neutral:   "( -_- )",
   smile:     "( ^_^ )",
   smirk:     "( ¬‿¬ )",
@@ -15,12 +15,13 @@ const expressions: Record<NonNullable<AiExpression>, string> = {
 };
 
 interface Props {
-  expression: AiExpression;
+  expression: Expression;
 }
 
 export default function AsciiExpression({ expression }: Props) {
-  const face = expression ? expressions[expression] : expressions.neutral;
-  return (
-    <span className="ascii-face">{face}</span>
-  );
+  const face =
+    expression && expressions[expression]
+      ? expressions[expression]
+      : expressions.neutral;
+  return <span className="ascii-face">{face}</span>;
 }

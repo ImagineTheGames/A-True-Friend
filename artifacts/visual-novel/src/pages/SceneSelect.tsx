@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Scene, GameSettings } from "../data/types";
+import storyConfig from "../data/story.config";
 import SceneNav from "../components/SceneNav";
 import SettingsPanel from "../components/SettingsPanel";
 
@@ -54,8 +55,8 @@ export default function SceneSelect({
 
       <div className="scene-select-content">
         <div className="title-block">
-          <h1 className="game-title">ARIA</h1>
-          <p className="game-subtitle">A Story Told in Signals</p>
+          <h1 className="game-title">{storyConfig.title}</h1>
+          <p className="game-subtitle">{storyConfig.subtitle}</p>
         </div>
 
         <div className="scene-list">

@@ -1,8 +1,10 @@
+import storyConfig from "../data/story.config";
+
 interface Props {
   background: string;
 }
 
-export const backgroundData: Record<string, { gradient: string; label: string }> = {
+const builtinBackgrounds: Record<string, { gradient: string; label: string }> = {
   "bedroom-night": {
     gradient: "linear-gradient(160deg, #0a0a1a 0%, #1a1a3e 40%, #0d1b2a 100%)",
     label: "Bedroom — Late Night",
@@ -21,12 +23,17 @@ export const backgroundData: Record<string, { gradient: string; label: string }>
   },
 };
 
+// Fork authors add extra backgrounds in story.config.ts → backgrounds: { ... }
+const allBackgrounds = { ...builtinBackgrounds, ...(storyConfig.backgrounds ?? {}) };
+
 export function getBackgroundLabel(background: string): string {
-  return backgroundData[background]?.label ?? "";
+  return allBackgrounds[background]?.label ?? "";
 }
 
 export default function SceneBackground({ background }: Props) {
-  const bg = backgroundData[background] ?? { gradient: "linear-gradient(160deg, #1a1a2e 0%, #16213e 100%)" };
+  const bg = allBackgrounds[background] ?? {
+    gradient: "linear-gradient(160deg, #1a1a2e 0%, #16213e 100%)",
+  };
   return (
     <div className="scene-background" style={{ background: bg.gradient }}>
       <div className="bg-grid" />

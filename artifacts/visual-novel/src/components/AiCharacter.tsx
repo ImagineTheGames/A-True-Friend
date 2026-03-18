@@ -1,13 +1,7 @@
-import { AiExpression } from "../data/types";
+import type { CharacterProps } from "../data/types";
 import AsciiExpression from "./AsciiExpression";
 
-interface Props {
-  expression: AiExpression;
-  isActive: boolean;
-  isSpeaking: boolean;
-}
-
-export default function AiCharacter({ expression, isActive, isSpeaking }: Props) {
+export default function AiCharacter({ expression = null, isActive, isSpeaking }: CharacterProps) {
   return (
     <div className={`ai-character ${isActive ? "active" : "inactive"}`} aria-hidden="true">
       <div className="monitor-wrap">

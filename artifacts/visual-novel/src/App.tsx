@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import story from "./data/storyIndex";
+import storyConfig from "./data/story.config";
 import SceneSelect from "./pages/SceneSelect";
 import GameScene from "./pages/GameScene";
 import { useSettings } from "./hooks/useSettings";
@@ -11,6 +12,17 @@ export default function App() {
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [completedScenes, setCompletedScenes] = useState<Set<string>>(new Set());
   const { settings, updateSettings } = useSettings();
+
+  // Apply any CSS custom-property overrides declared in story.config.ts → theme.
+  // Fork authors can retheme the entire game without touching index.css.
+  useEffect(() => {
+    const { theme } = storyConfig;
+    if (!theme) return;
+    const root = document.documentElement;
+    Object.entries(theme).forEach(([prop, value]) => {
+      root.style.setProperty(prop, value);
+    });
+  }, []);
 
   const markComplete = (id: string) =>
     setCompletedScenes((prev) => new Set([...prev, id]));

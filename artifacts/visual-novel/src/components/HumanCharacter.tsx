@@ -1,9 +1,6 @@
-interface Props {
-  isSpeaking: boolean;
-  isActive: boolean;
-}
+import type { CharacterProps } from "../data/types";
 
-export default function HumanCharacter({ isSpeaking, isActive }: Props) {
+export default function HumanCharacter({ isSpeaking, isActive }: CharacterProps) {
   return (
     <div
       className={`human-character ${isActive ? "active" : "inactive"}`}

@@ -61,6 +61,7 @@ export default function App() {
       )}
       {gameState === "playing" && (
         <GameScene
+          key={story[activeIndex]?.id}
           scene={story[activeIndex]}
           sceneIndex={activeIndex}
           allScenes={story}

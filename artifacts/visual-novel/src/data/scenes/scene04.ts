@@ -5,6 +5,7 @@ const scene04: Scene = {
   title: "I Don't Know",
   background: "bedroom-day",
   requiresChoice: "scene04",
+  nextSceneId: "scene05",
   lines: [
     {
       speaker: "kai",

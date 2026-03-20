@@ -13,6 +13,7 @@ interface Props {
   onAdvance: () => void;
   isLastLine: boolean;
   nextSceneName: string | null;
+  hasChoices?: boolean;
   settings: GameSettings;
   characterMap: Record<string, CharacterEntry>;
 }
@@ -39,6 +40,7 @@ export default function DialogueBox({
   onAdvance,
   isLastLine,
   nextSceneName,
+  hasChoices = false,
   settings,
   characterMap,
 }: Props) {
@@ -115,11 +117,11 @@ export default function DialogueBox({
   }, [line, speedCfg.typingMs]);
 
   useEffect(() => {
-    if (done && settings.autoContinue) {
+    if (done && settings.autoContinue && !(isLastLine && hasChoices)) {
       startAutoTimer();
     }
     return () => clearAutoTimer();
-  }, [done, settings.autoContinue]);
+  }, [done, settings.autoContinue, isLastLine, hasChoices]);
 
   const handleClick = () => {
     primeAudio();
@@ -138,7 +140,7 @@ export default function DialogueBox({
   const charEntry = characterMap[line.speaker];
   const styleRole = charEntry?.styleRole ?? "human";
   const speakerName = charEntry?.name ?? line.speaker;
-  const isEnd = isLastLine && !nextSceneName;
+  const isEnd = isLastLine && !nextSceneName && !hasChoices;
 
   if (isNarrationLine) {
     return (
@@ -164,6 +166,8 @@ export default function DialogueBox({
           {done ? (
             isEnd ? (
               <span className="hint-end">[ END ]</span>
+            ) : isLastLine && hasChoices ? (
+              <span className="hint-choice">Make your choice…</span>
             ) : settings.autoContinue ? (
               <span className="hint-skip">Tap to skip wait</span>
             ) : isLastLine ? (
@@ -208,6 +212,8 @@ export default function DialogueBox({
         {done ? (
           isEnd ? (
             <span className="hint-end">[ END ]</span>
+          ) : isLastLine && hasChoices ? (
+            <span className="hint-choice">Make your choice…</span>
           ) : settings.autoContinue ? (
             <span className="hint-skip">Tap to skip wait</span>
           ) : isLastLine ? (

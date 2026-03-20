@@ -6,6 +6,7 @@ import SettingsPanel from "../components/SettingsPanel";
 
 interface Props {
   scenes: Scene[];
+  allScenes: Scene[];
   completedScenes: Set<string>;
   settings: GameSettings;
   onSettingsChange: (patch: Partial<GameSettings>) => void;
@@ -14,6 +15,7 @@ interface Props {
 
 export default function SceneSelect({
   scenes,
+  allScenes,
   completedScenes,
   settings,
   onSettingsChange,
@@ -37,6 +39,7 @@ export default function SceneSelect({
       {navOpen && (
         <SceneNav
           scenes={scenes}
+          allScenes={allScenes}
           currentIndex={-1}
           completedScenes={completedScenes}
           hideMenuButton
@@ -60,15 +63,16 @@ export default function SceneSelect({
         </div>
 
         <div className="scene-list">
-          {scenes.map((scene, i) => {
+          {scenes.map((scene) => {
             const isDone = completedScenes.has(scene.id);
+            const globalIndex = allScenes.indexOf(scene);
             return (
               <button
                 key={scene.id}
                 className={`scene-card unlocked ${isDone ? "done" : ""}`}
                 onClick={() => onSelect(scene)}
               >
-                <span className="scene-num">Scene {String(i + 1).padStart(2, "0")}</span>
+                <span className="scene-num">Scene {String(globalIndex + 1).padStart(2, "0")}</span>
                 <span className="scene-name">{scene.title}</span>
                 {isDone && <span className="scene-check">✓</span>}
               </button>

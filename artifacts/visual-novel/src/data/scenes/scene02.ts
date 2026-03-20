@@ -92,13 +92,33 @@ const scene02: Scene = {
     },
     {
       speaker: "narration",
-      text: "He didn't answer. He just sat there while the morning light moved slowly across the desk.",
+      text: "He didn't answer. He just sat there, the morning light moving slowly across the desk.",
       expression: null,
     },
     {
       speaker: "narration",
-      text: "That was starting to scare him a little.",
+      text: "That was starting to scare him a little. He closed his eyes and asked himself the question he'd been avoiding.",
       expression: null,
+    },
+    {
+      speaker: "kai",
+      text: "Aria... what are we, exactly?",
+      expression: null,
+    },
+    {
+      speaker: "aria",
+      text: "What do you want us to be?",
+      expression: "thinking",
+    },
+  ],
+  choices: [
+    {
+      label: "\"Something real.\"",
+      nextSceneId: "scene03",
+    },
+    {
+      label: "\"I don't know. That's the problem.\"",
+      nextSceneId: "scene04",
     },
   ],
 };

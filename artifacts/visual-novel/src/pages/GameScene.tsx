@@ -9,6 +9,7 @@ import {
 import storyConfig from "../data/story.config";
 import SceneBackground, { getBackgroundLabel } from "../components/SceneBackground";
 import DialogueBox from "../components/DialogueBox";
+import ChoiceBox from "../components/ChoiceBox";
 import SceneNav from "../components/SceneNav";
 import SettingsPanel from "../components/SettingsPanel";
 
@@ -16,10 +17,12 @@ interface Props {
   scene: Scene;
   sceneIndex: number;
   allScenes: Scene[];
+  visibleScenes: Scene[];
   completedScenes: Set<string>;
   settings: GameSettings;
   onSettingsChange: (patch: Partial<GameSettings>) => void;
   onSceneEnd: () => void;
+  onChoose: (sceneId: string) => void;
   onGoToScene: (index: number) => void;
   onReturnToMenu: () => void;
 }
@@ -48,15 +51,18 @@ export default function GameScene({
   scene,
   sceneIndex,
   allScenes,
+  visibleScenes,
   completedScenes,
   settings,
   onSettingsChange,
   onSceneEnd,
+  onChoose,
   onGoToScene,
   onReturnToMenu,
 }: Props) {
   const [lineIndex, setLineIndex] = useState(0);
   const [lineComplete, setLineComplete] = useState(false);
+  const [showChoices, setShowChoices] = useState(false);
   // Per-character expression state — each character keeps its last expression
   // until explicitly changed by a new line.
   const [expressions, setExpressions] = useState<Record<string, Expression>>({});
@@ -65,8 +71,22 @@ export default function GameScene({
 
   const currentLine: DialogueLine = scene.lines[lineIndex];
   const isLastLine = lineIndex === scene.lines.length - 1;
-  const nextScene = allScenes[sceneIndex + 1] ?? null;
+  const hasChoices = !!(scene.choices && scene.choices.length > 0);
   const locationLabel = getBackgroundLabel(scene.background);
+
+  const resolvedNextScene = useMemo(() => {
+    if (hasChoices) return null;
+    if (scene.nextSceneId) {
+      return allScenes.find((s) => s.id === scene.nextSceneId) ?? null;
+    }
+    for (let i = sceneIndex + 1; i < allScenes.length; i++) {
+      const candidate = allScenes[i];
+      if (!candidate.requiresChoice || visibleScenes.includes(candidate)) {
+        return candidate;
+      }
+    }
+    return null;
+  }, [scene, sceneIndex, allScenes, visibleScenes, hasChoices]);
   const isNarration = currentLine.speaker === "narration";
 
   // Resolve active cast once per scene change.
@@ -79,6 +99,7 @@ export default function GameScene({
   useEffect(() => {
     setLineIndex(0);
     setLineComplete(false);
+    setShowChoices(false);
     setExpressions({});
     setNavOpen(false);
     setSettingsOpen(false);
@@ -94,11 +115,20 @@ export default function GameScene({
     }
   }, [currentLine]);
 
-  const handleLineComplete = () => setLineComplete(true);
+  const handleLineComplete = () => {
+    setLineComplete(true);
+    if (isLastLine && scene.choices && scene.choices.length > 0) {
+      setShowChoices(true);
+    }
+  };
 
   const handleAdvance = () => {
     if (isLastLine) {
-      onSceneEnd();
+      if (scene.choices && scene.choices.length > 0) {
+        setShowChoices(true);
+      } else {
+        onSceneEnd();
+      }
     } else {
       setLineIndex((i) => i + 1);
       setLineComplete(false);
@@ -146,10 +176,15 @@ export default function GameScene({
 
       {navOpen && (
         <SceneNav
-          scenes={allScenes}
-          currentIndex={sceneIndex}
+          scenes={visibleScenes}
+          allScenes={allScenes}
+          currentIndex={visibleScenes.indexOf(scene)}
           completedScenes={completedScenes}
-          onSelectScene={(i) => { setNavOpen(false); onGoToScene(i); }}
+          onSelectScene={(i) => {
+            const globalIdx = allScenes.indexOf(visibleScenes[i]);
+            setNavOpen(false);
+            onGoToScene(globalIdx);
+          }}
           onOpenSettings={() => { setNavOpen(false); setSettingsOpen(true); }}
           onReturnToMenu={() => { setNavOpen(false); onReturnToMenu(); }}
         />
@@ -181,10 +216,18 @@ export default function GameScene({
         onComplete={handleLineComplete}
         onAdvance={handleAdvance}
         isLastLine={isLastLine}
-        nextSceneName={nextScene?.title ?? null}
+        nextSceneName={resolvedNextScene?.title ?? null}
+        hasChoices={hasChoices}
         settings={settings}
         characterMap={characterMap}
       />
+
+      {showChoices && scene.choices && (
+        <ChoiceBox
+          choices={scene.choices}
+          onChoose={onChoose}
+        />
+      )}
     </div>
   );
 }

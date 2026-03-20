@@ -2,6 +2,7 @@ import { Scene } from "../data/types";
 
 interface Props {
   scenes: Scene[];
+  allScenes: Scene[];
   currentIndex: number;
   completedScenes: Set<string>;
   hideMenuButton?: boolean;
@@ -12,6 +13,7 @@ interface Props {
 
 export default function SceneNav({
   scenes,
+  allScenes,
   currentIndex,
   completedScenes,
   hideMenuButton = false,
@@ -30,6 +32,7 @@ export default function SceneNav({
           {scenes.map((scene, i) => {
             const isCurrent = i === currentIndex;
             const isDone = completedScenes.has(scene.id);
+            const globalIndex = allScenes.indexOf(scene);
 
             return (
               <button
@@ -37,7 +40,7 @@ export default function SceneNav({
                 className={`scene-nav-item ${isCurrent ? "current" : ""} ${isDone ? "done" : ""}`}
                 onClick={() => onSelectScene(i)}
               >
-                <span className="snav-num">{String(i + 1).padStart(2, "0")}</span>
+                <span className="snav-num">{String(globalIndex + 1).padStart(2, "0")}</span>
                 <span className="snav-name">{scene.title}</span>
                 {isCurrent && <span className="snav-badge current-badge">▶ Now</span>}
                 {isDone && !isCurrent && <span className="snav-badge done-badge">✓</span>}

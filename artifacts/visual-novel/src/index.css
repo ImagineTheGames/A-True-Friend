@@ -631,9 +631,95 @@ body {
   color: rgba(255,255,255,0.2);
 }
 
+.hint-choice {
+  color: var(--accent-purple);
+  animation: pulse-text 1.8s ease-in-out infinite;
+}
+
 @keyframes pulse-text {
   0%, 100% { opacity: 0.5; }
   50% { opacity: 1; }
+}
+
+/* ─── CHOICE BOX ───────────────────────────────────────────────── */
+
+.choice-box-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 1rem calc(1rem + env(safe-area-inset-bottom, 0px)) 1rem;
+  animation: fadeIn 0.25s ease;
+}
+
+.choice-box {
+  width: 100%;
+  max-width: 560px;
+  background: rgba(6, 6, 22, 0.93);
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 10px;
+  box-shadow: 0 0 40px rgba(192, 132, 252, 0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+  backdrop-filter: blur(16px);
+  padding: 1.25rem 1.5rem 1rem;
+}
+
+.choice-box-header {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-purple);
+  opacity: 0.8;
+  margin-bottom: 0.9rem;
+  animation: pulse-text 1.8s ease-in-out infinite;
+}
+
+.choice-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choice-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(192, 132, 252, 0.06);
+  border: 1px solid rgba(192, 132, 252, 0.2);
+  border-radius: 7px;
+  color: var(--text-main);
+  font-family: var(--font-ui);
+  font-size: clamp(0.9rem, 2vw, 1rem);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.18s, border-color 0.18s, transform 0.15s;
+}
+
+.choice-btn:hover {
+  background: rgba(192, 132, 252, 0.14);
+  border-color: rgba(192, 132, 252, 0.5);
+  transform: translateX(4px);
+}
+
+.choice-arrow {
+  font-size: 0.65rem;
+  color: var(--accent-purple);
+  flex-shrink: 0;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+
+.choice-btn:hover .choice-arrow {
+  opacity: 1;
+}
+
+.choice-label {
+  flex: 1;
+  line-height: 1.4;
 }
 
 /* ─── IN-GAME NAV TOGGLE ───────────────────────────────────────── */

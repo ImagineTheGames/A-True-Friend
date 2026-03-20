@@ -49,12 +49,20 @@ export interface DialogueLine {
   expression: Expression;
 }
 
+export interface Choice {
+  label: string;
+  nextSceneId: string;
+}
+
 export interface Scene {
   id: string;
   title: string;
   background: string;
   cast?: CharacterSlot[];
   lines: DialogueLine[];
+  choices?: Choice[];
+  nextSceneId?: string;
+  requiresChoice?: string;
 }
 
 export type ReadingSpeed = "slow" | "normal" | "fast" | "vfast";

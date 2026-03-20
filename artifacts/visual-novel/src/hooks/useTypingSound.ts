@@ -25,6 +25,16 @@ function resumeAndFire(ctx: AudioContext, fire: () => void) {
   }
 }
 
+// Call this directly inside any click/keydown handler (i.e. from a user gesture).
+// Browsers block AudioContext.resume() when called from setInterval/setTimeout —
+// priming here ensures the context is "running" before the typing interval fires.
+export function primeAudio(): void {
+  const ctx = getCtx();
+  if (ctx && ctx.state !== "running") {
+    ctx.resume().catch(() => {});
+  }
+}
+
 // ── Keyboard-click sound for dialogue ──────────────────────────────
 export function useTypingSound(enabled: boolean) {
   const playClick = useCallback(() => {

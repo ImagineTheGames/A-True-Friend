@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { DialogueLine, GameSettings, SPEED_CONFIG } from "../data/types";
-import { useTypingSound, useNarrationSound } from "../hooks/useTypingSound";
+import { useTypingSound, useNarrationSound, primeAudio } from "../hooks/useTypingSound";
 
 interface CharacterEntry {
   name: string;
@@ -122,6 +122,7 @@ export default function DialogueBox({
   }, [done, settings.autoContinue]);
 
   const handleClick = () => {
+    primeAudio();
     if (!done) {
       mutedUntilRef.current = Date.now() + 200;
       if (intervalRef.current) clearInterval(intervalRef.current);

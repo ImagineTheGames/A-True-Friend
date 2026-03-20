@@ -4,6 +4,7 @@ import storyConfig from "./data/story.config";
 import SceneSelect from "./pages/SceneSelect";
 import GameScene from "./pages/GameScene";
 import { useSettings } from "./hooks/useSettings";
+import { primeAudio } from "./hooks/useTypingSound";
 
 type GameState = "menu" | "playing";
 
@@ -28,6 +29,7 @@ export default function App() {
     setCompletedScenes((prev) => new Set([...prev, id]));
 
   const handleSelectScene = (index: number) => {
+    primeAudio();
     setActiveIndex(index);
     setGameState("playing");
   };

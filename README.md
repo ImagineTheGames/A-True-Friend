@@ -17,6 +17,9 @@ ARIA is a short visual novel about the strange intimacy of talking to an AI — 
 ## Features
 
 - Scene-based narrative — easy to extend with new scenes
+- **Branching choices** — scenes can present 2–4 options, each routing to a specific scene by ID
+- **Configurable routing** — any scene can explicitly declare its next destination instead of advancing linearly
+- **Conditional scenes** — scenes can be hidden until the player has made a specific choice
 - Two-character stage with dynamic positioning per scene
 - Narration system — centered italic lines with a distinct digital sound
 - Typing sounds — procedural Web Audio (no audio files required)
@@ -29,7 +32,7 @@ ARIA is a short visual novel about the strange intimacy of talking to an AI — 
 
 ## Playing
 
-Open the app, select a scene, and click (or tap, or press Space/Enter) to advance dialogue. The hamburger menu lets you jump between scenes and access settings.
+Open the app, select a scene, and click (or tap, or press Space/Enter) to advance dialogue. At choice scenes a choice overlay appears automatically — pick an option to branch the story. The hamburger menu lets you jump between scenes and access settings.
 
 ---
 
@@ -51,19 +54,23 @@ Open the app, select a scene, and click (or tap, or press Space/Enter) to advanc
 artifacts/visual-novel/src/
 ├── data/
 │   ├── story.config.ts     ← fork here — title, cast, backgrounds, theme
-│   ├── storyIndex.ts       ← register scenes here
+│   ├── storyIndex.ts       ← register all scenes here
 │   ├── types.ts            ← shared TypeScript types
 │   └── scenes/
-│       ├── scene01.ts
-│       └── scene02.ts
+│       ├── scene01.ts      ← linear scene
+│       ├── scene02.ts      ← ends with a choice
+│       ├── scene03.ts      ← branch A (requires choice)
+│       ├── scene04.ts      ← branch B (requires choice)
+│       └── scene05.ts      ← shared continuation both branches lead to
 ├── components/
 │   ├── DialogueBox.tsx     ← typing animation, sounds, auto-continue
+│   ├── ChoiceBox.tsx       ← choice overlay for branching scenes
 │   ├── HumanCharacter.tsx  ← SVG character sprite
 │   ├── AiCharacter.tsx     ← monitor + ASCII expression display
 │   ├── AsciiExpression.tsx ← expression set for AiCharacter
 │   └── SceneBackground.tsx ← background renderer
 ├── pages/
-│   ├── GameScene.tsx       ← scene runtime, dynamic cast
+│   ├── GameScene.tsx       ← scene runtime, dynamic cast, choice logic
 │   └── SceneSelect.tsx     ← main menu
 └── hooks/
     ├── useTypingSound.ts   ← dialogue + narration Web Audio hooks
@@ -130,7 +137,7 @@ const storyConfig: StoryConfig = {
 
 ### 3. Write your scenes
 
-Create `src/data/scenes/scene01.ts`:
+#### Linear scene
 
 ```typescript
 import { Scene } from "../types";
@@ -165,14 +172,89 @@ const scene01: Scene = {
 export default scene01;
 ```
 
+#### Choice scene — branch the story
+
+Add a `choices` array to any scene. After the last dialogue line finishes, a choice overlay appears and the player picks an option. Each choice routes to a specific scene by ID.
+
+```typescript
+const scene02: Scene = {
+  id: "scene02",
+  title: "The Crossroads",
+  background: "cafe",
+  lines: [
+    {
+      speaker: "guide",
+      text: "What do you want to do?",
+      expression: "curious",
+    },
+  ],
+  choices: [
+    { label: "\"Push forward.\"",      nextSceneId: "scene03a" },
+    { label: "\"Take a step back.\"",  nextSceneId: "scene03b" },
+  ],
+};
+```
+
+#### Routing a scene to a specific destination
+
+By default, a scene advances to the next entry in `storyIndex.ts`. Use `nextSceneId` to route explicitly to any scene instead — useful for making two branches rejoin at a shared continuation:
+
+```typescript
+const scene03a: Scene = {
+  id: "scene03a",
+  title: "Moving Forward",
+  background: "bedroom-day",
+  nextSceneId: "scene04",   // ← skip the other branch and jump to scene04
+  lines: [ /* ... */ ],
+};
+
+const scene03b: Scene = {
+  id: "scene03b",
+  title: "Stepping Back",
+  background: "bedroom-night",
+  nextSceneId: "scene04",   // ← same destination
+  lines: [ /* ... */ ],
+};
+
+// Both branches rejoin here
+const scene04: Scene = {
+  id: "scene04",
+  title: "The Reunion",
+  background: "cafe",
+  lines: [ /* ... */ ],
+};
+```
+
+#### Conditional scenes — hide until a choice is made
+
+Use `requiresChoice` to lock a scene out of the menu and scene-nav until the player has made a specific choice. Set it to the `nextSceneId` value that was used to reach this scene:
+
+```typescript
+const scene03a: Scene = {
+  id: "scene03a",
+  title: "Moving Forward",
+  background: "bedroom-day",
+  requiresChoice: "scene03a",   // hidden until the player chose nextSceneId: "scene03a"
+  nextSceneId: "scene04",
+  lines: [ /* ... */ ],
+};
+```
+
+Scenes without `requiresChoice` are always visible. Scenes with it are hidden from the scene-select menu and the in-game nav until their condition is met.
+
 ### 4. Register scenes
+
+List every scene in `storyIndex.ts` — both branch scenes and shared continuations:
 
 ```typescript
 // src/data/storyIndex.ts
 import scene01 from "./scenes/scene01";
 import scene02 from "./scenes/scene02";
+import scene03a from "./scenes/scene03a";
+import scene03b from "./scenes/scene03b";
+import scene04 from "./scenes/scene04";
 
-const story = [scene01, scene02];
+const story = [scene01, scene02, scene03a, scene03b, scene04];
 export default story;
 ```
 
@@ -216,6 +298,21 @@ ARIA uses ASCII art expressions rendered on the monitor screen. Available keys:
 | `sincere` | `( ◕‿◕ )` |
 
 Add more in `src/components/AsciiExpression.tsx`.
+
+---
+
+## Scene Fields Reference
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `id` | `string` | ✓ | Unique scene identifier. Used by `nextSceneId` and `requiresChoice` |
+| `title` | `string` | ✓ | Shown in the top bar and scene-select menu |
+| `background` | `string` | ✓ | Background key — built-in or declared in `story.config.ts` |
+| `lines` | `DialogueLine[]` | ✓ | Ordered dialogue/narration lines |
+| `cast` | `CharacterSlot[]` | | Override which characters appear and on which side for this scene |
+| `choices` | `Choice[]` | | If present, shows a choice overlay after the last line instead of auto-advancing |
+| `nextSceneId` | `string` | | Explicitly route to this scene ID when the scene ends (overrides linear order) |
+| `requiresChoice` | `string` | | Hide this scene from menus until the player has navigated here via a choice with `nextSceneId` matching this value |
 
 ---
 

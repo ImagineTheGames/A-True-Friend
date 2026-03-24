@@ -12,11 +12,13 @@ import AiCharacter from "../components/AiCharacter";
 //     style to use ("human" = blue, "ai" = green).
 //  3. Reference character ids in your scene files (speaker: "your-id").
 //  4. Optionally add extra backgrounds or theme colour overrides below.
+//  5. Optionally define chapters to group scenes into a collapsible accordion
+//     on the scene select screen. Each chapter lists its scene IDs in order.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const storyConfig: StoryConfig = {
-  title: "ARIA",
-  subtitle: "A Story Told in Signals",
+  title: "A True Friend",
+  subtitle: "A Visual Play",
 
   characters: [
     {
@@ -32,6 +34,21 @@ const storyConfig: StoryConfig = {
       component: AiCharacter,
       defaultSide: "right",
       styleRole: "ai",
+    },
+  ],
+
+  chapters: [
+    {
+      title: "Act I — The Unraveling",
+      sceneIds: ["scene01", "scene02", "scene03"],
+    },
+    {
+      title: "Act II — The Betrayal",
+      sceneIds: ["scene04", "scene05", "scene06"],
+    },
+    {
+      title: "Act III — What Remains",
+      sceneIds: ["scene07", "scene08", "scene09"],
     },
   ],
 

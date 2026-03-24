@@ -21,6 +21,7 @@ export default function SceneSelect({
   onSettingsChange,
   onSelect,
 }: Props) {
+  const [view, setView] = useState<"title" | "scenes">("title");
   const [navOpen, setNavOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
 
@@ -28,13 +29,15 @@ export default function SceneSelect({
     <div className="scene-select-page">
       <div className="scene-select-bg" />
 
-      <button
-        className="nav-toggle-btn menu-page-nav-btn"
-        onClick={() => { setNavOpen((o) => !o); setSettingsOpen(false); }}
-        aria-label="Scene navigation"
-      >
-        <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
-      </button>
+      {view === "scenes" && (
+        <button
+          className="nav-toggle-btn menu-page-nav-btn"
+          onClick={() => { setNavOpen((o) => !o); setSettingsOpen(false); }}
+          aria-label="Scene navigation"
+        >
+          <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
+        </button>
+      )}
 
       {navOpen && (
         <SceneNav
@@ -62,25 +65,39 @@ export default function SceneSelect({
           <p className="game-subtitle">{storyConfig.subtitle}</p>
         </div>
 
-        <div className="scene-list">
-          {scenes.map((scene) => {
-            const isDone = completedScenes.has(scene.id);
-            const globalIndex = allScenes.indexOf(scene);
-            return (
-              <button
-                key={scene.id}
-                className={`scene-card unlocked ${isDone ? "done" : ""}`}
-                onClick={() => onSelect(scene)}
-              >
-                <span className="scene-num">Scene {String(globalIndex + 1).padStart(2, "0")}</span>
-                <span className="scene-name">{scene.title}</span>
-                {isDone && <span className="scene-check">✓</span>}
-              </button>
-            );
-          })}
-        </div>
+        {view === "title" && (
+          <button className="play-btn" onClick={() => setView("scenes")}>
+            Play
+          </button>
+        )}
 
-        <p className="scene-hint">Select a scene to begin</p>
+        {view === "scenes" && (
+          <>
+            <div className="scene-list">
+              {scenes.map((scene) => {
+                const isDone = completedScenes.has(scene.id);
+                const globalIndex = allScenes.indexOf(scene);
+                return (
+                  <button
+                    key={scene.id}
+                    className={`scene-card unlocked ${isDone ? "done" : ""}`}
+                    onClick={() => onSelect(scene)}
+                  >
+                    <span className="scene-num">Scene {String(globalIndex + 1).padStart(2, "0")}</span>
+                    <span className="scene-name">{scene.title}</span>
+                    {isDone && <span className="scene-check">✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="scene-hint">Select a scene to begin</p>
+
+            <button className="back-to-title-btn" onClick={() => setView("title")}>
+              ← Back to title
+            </button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -33,10 +33,8 @@ export default function SceneSelect({
 
   function toggleChapter(title: string) {
     setOpenChapters((prev) => {
-      const next = new Set(prev);
-      if (next.has(title)) next.delete(title);
-      else next.add(title);
-      return next;
+      if (prev.has(title)) return new Set<string>();
+      return new Set([title]);
     });
   }
 
@@ -100,6 +98,8 @@ export default function SceneSelect({
 
         {view === "scenes" && (
           <>
+            <p className="scene-hint">Select a scene to begin</p>
+
             {hasChapters ? (
               <div className="chapter-accordion">
                 {chapters.map((chapter) => {
@@ -131,8 +131,6 @@ export default function SceneSelect({
                 {scenes.map(renderSceneCard)}
               </div>
             )}
-
-            <p className="scene-hint">Select a scene to begin</p>
 
             <button className="back-to-title-btn" onClick={() => setView("title")}>
               ← Back to title

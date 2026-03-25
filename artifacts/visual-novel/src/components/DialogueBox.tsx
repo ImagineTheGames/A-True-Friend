@@ -11,6 +11,9 @@ interface Props {
   line: DialogueLine;
   onComplete: () => void;
   onAdvance: () => void;
+  onBack?: () => void;
+  isFirstLine?: boolean;
+  instantReveal?: boolean;
   isLastLine: boolean;
   nextSceneName: string | null;
   hasChoices?: boolean;
@@ -38,6 +41,9 @@ export default function DialogueBox({
   line,
   onComplete,
   onAdvance,
+  onBack,
+  isFirstLine = false,
+  instantReveal = false,
   isLastLine,
   nextSceneName,
   hasChoices = false,
@@ -54,8 +60,8 @@ export default function DialogueBox({
   const lastSoundRef = useRef(0);
   const mutedUntilRef = useRef(0);
   const isNarrationLine = line.speaker === "narration";
-  const playClick = useTypingSound(settings.soundEnabled && !isNarrationLine);
-  const playBlip  = useNarrationSound(settings.soundEnabled && isNarrationLine);
+  const playClick = useTypingSound(settings.soundEnabled && !isNarrationLine, settings.volume ?? 1);
+  const playBlip  = useNarrationSound(settings.soundEnabled && isNarrationLine, settings.volume ?? 1);
   const playSound = isNarrationLine ? playBlip : playClick;
   const soundThrottle = isNarrationLine ? 80 : 55;
 
@@ -91,6 +97,13 @@ export default function DialogueBox({
     setDone(false);
     clearAutoTimer();
     setAutoProgress(0);
+
+    if (instantReveal) {
+      setDisplayed(line.text);
+      setDone(true);
+      onComplete();
+      return;
+    }
 
     lastSoundRef.current = 0;
     let i = 0;
@@ -142,6 +155,21 @@ export default function DialogueBox({
   const speakerName = charEntry?.name ?? line.speaker;
   const isEnd = isLastLine && !nextSceneName && !hasChoices;
 
+  const handleBackClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onBack) onBack();
+  };
+
+  const backButton = onBack && !isFirstLine ? (
+    <button
+      className="dialogue-back-btn"
+      onClick={handleBackClick}
+      aria-label="Go back one line"
+    >
+      ←
+    </button>
+  ) : null;
+
   if (isNarrationLine) {
     return (
       <div
@@ -162,22 +190,25 @@ export default function DialogueBox({
           {!done && <span className="typing-cursor narration-cursor">|</span>}
         </div>
 
-        <div className="dialogue-hint">
-          {done ? (
-            isEnd ? (
-              <span className="hint-end">[ END ]</span>
-            ) : isLastLine && hasChoices ? (
-              <span className="hint-choice">Make your choice…</span>
-            ) : settings.autoContinue ? (
-              <span className="hint-skip">Tap to skip wait</span>
-            ) : isLastLine ? (
-              <span className="hint-next">▶ Tap to continue — {nextSceneName}</span>
+        <div className="dialogue-footer">
+          <div className="dialogue-back-slot">{backButton}</div>
+          <div className="dialogue-hint">
+            {done ? (
+              isEnd ? (
+                <span className="hint-end">[ END ]</span>
+              ) : isLastLine && hasChoices ? (
+                <span className="hint-choice">Make your choice…</span>
+              ) : settings.autoContinue ? (
+                <span className="hint-skip">Tap to skip wait</span>
+              ) : isLastLine ? (
+                <span className="hint-next">▶ Tap to continue — {nextSceneName}</span>
+              ) : (
+                <span className="hint-next">▶ Tap or press Enter to continue</span>
+              )
             ) : (
-              <span className="hint-next">▶ Tap or press Enter to continue</span>
-            )
-          ) : (
-            <span className="hint-skip">Tap to skip</span>
-          )}
+              <span className="hint-skip">Tap to skip</span>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -208,22 +239,25 @@ export default function DialogueBox({
         {!done && <span className="typing-cursor">|</span>}
       </div>
 
-      <div className="dialogue-hint">
-        {done ? (
-          isEnd ? (
-            <span className="hint-end">[ END ]</span>
-          ) : isLastLine && hasChoices ? (
-            <span className="hint-choice">Make your choice…</span>
-          ) : settings.autoContinue ? (
-            <span className="hint-skip">Tap to skip wait</span>
-          ) : isLastLine ? (
-            <span className="hint-next">▶ Tap to continue — {nextSceneName}</span>
+      <div className="dialogue-footer">
+        <div className="dialogue-back-slot">{backButton}</div>
+        <div className="dialogue-hint">
+          {done ? (
+            isEnd ? (
+              <span className="hint-end">[ END ]</span>
+            ) : isLastLine && hasChoices ? (
+              <span className="hint-choice">Make your choice…</span>
+            ) : settings.autoContinue ? (
+              <span className="hint-skip">Tap to skip wait</span>
+            ) : isLastLine ? (
+              <span className="hint-next">▶ Tap to continue — {nextSceneName}</span>
+            ) : (
+              <span className="hint-next">▶ Tap or press Enter to continue</span>
+            )
           ) : (
-            <span className="hint-next">▶ Tap or press Enter to continue</span>
-          )
-        ) : (
-          <span className="hint-skip">Tap to skip</span>
-        )}
+            <span className="hint-skip">Tap to skip</span>
+          )}
+        </div>
       </div>
     </div>
   );

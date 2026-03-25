@@ -1,8 +1,5 @@
 import { useCallback } from "react";
 
-// Single AudioContext shared for the entire session.
-// Creating a new one per component causes browsers to hit their instance limit
-// (~6-32 contexts) after just a few line advances, silently killing audio.
 let _ctx: AudioContext | null = null;
 
 function getCtx(): AudioContext | null {
@@ -25,9 +22,6 @@ function resumeAndFire(ctx: AudioContext, fire: () => void) {
   }
 }
 
-// Call this directly inside any click/keydown handler (i.e. from a user gesture).
-// Browsers block AudioContext.resume() when called from setInterval/setTimeout —
-// priming here ensures the context is "running" before the typing interval fires.
 export function primeAudio(): void {
   const ctx = getCtx();
   if (ctx && ctx.state !== "running") {
@@ -35,8 +29,7 @@ export function primeAudio(): void {
   }
 }
 
-// ── Keyboard-click sound for dialogue ──────────────────────────────
-export function useTypingSound(enabled: boolean) {
+export function useTypingSound(enabled: boolean, volume: number = 1) {
   const playClick = useCallback(() => {
     if (!enabled) return;
     const ctx = getCtx();
@@ -64,7 +57,7 @@ export function useTypingSound(enabled: boolean) {
         filter.Q.value = 1.2;
 
         const gain = ctx.createGain();
-        gain.gain.value = 0.06;
+        gain.gain.value = 0.06 * Math.max(0, Math.min(1, volume));
 
         source.connect(filter);
         filter.connect(gain);
@@ -76,15 +69,12 @@ export function useTypingSound(enabled: boolean) {
     };
 
     resumeAndFire(ctx, fire);
-  }, [enabled]);
+  }, [enabled, volume]);
 
   return playClick;
 }
 
-// ── Soft digital-sine blip for narration ───────────────────────────
-// A short downward sine sweep (300 → 220 Hz) — digital but calm,
-// nothing like the keyboard noise used for dialogue.
-export function useNarrationSound(enabled: boolean) {
+export function useNarrationSound(enabled: boolean, volume: number = 1) {
   const playBlip = useCallback(() => {
     if (!enabled) return;
     const ctx = getCtx();
@@ -94,28 +84,27 @@ export function useNarrationSound(enabled: boolean) {
       if (ctx.state !== "running") return;
       try {
         const now = ctx.currentTime;
-        const baseFreq = 280 + Math.random() * 60; // 280–340 Hz
+        const baseFreq = 280 + Math.random() * 60;
 
         const osc = ctx.createOscillator();
         osc.type = "sine";
         osc.frequency.setValueAtTime(baseFreq, now);
-        // Gentle downward pitch drift — gives a "settling" digital feel
         osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.72, now + 0.075);
 
-        const gain = ctx.createGain();
-        gain.gain.setValueAtTime(0, now);
-        gain.gain.linearRampToValueAtTime(0.032, now + 0.004); // soft attack
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.085); // smooth decay
+        const gainNode = ctx.createGain();
+        const vol = Math.max(0, Math.min(1, volume));
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(0.032 * vol, now + 0.004);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, now + 0.085);
 
-        // Low-pass to strip harshness
         const filter = ctx.createBiquadFilter();
         filter.type = "lowpass";
         filter.frequency.value = 700;
         filter.Q.value = 0.4;
 
         osc.connect(filter);
-        filter.connect(gain);
-        gain.connect(ctx.destination);
+        filter.connect(gainNode);
+        gainNode.connect(ctx.destination);
 
         osc.start(now);
         osc.stop(now + 0.09);
@@ -125,7 +114,7 @@ export function useNarrationSound(enabled: boolean) {
     };
 
     resumeAndFire(ctx, fire);
-  }, [enabled]);
+  }, [enabled, volume]);
 
   return playBlip;
 }

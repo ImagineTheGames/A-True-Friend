@@ -11,7 +11,6 @@ import SceneBackground, { getBackgroundLabel } from "../components/SceneBackgrou
 import DialogueBox from "../components/DialogueBox";
 import ChoiceBox from "../components/ChoiceBox";
 import SceneNav from "../components/SceneNav";
-import SettingsPanel from "../components/SettingsPanel";
 
 interface Props {
   scene: Scene;
@@ -27,9 +26,6 @@ interface Props {
   onReturnToMenu: () => void;
 }
 
-// Resolve which characters appear and on which side for a given scene.
-// If the scene declares a cast, use it; otherwise fall back to each
-// character's defaultSide from the config.
 function resolveActiveCast(scene: Scene): Array<{ character: CharacterConfig; side: "left" | "right" }> {
   if (scene.cast && scene.cast.length > 0) {
     return scene.cast
@@ -42,7 +38,6 @@ function resolveActiveCast(scene: Scene): Array<{ character: CharacterConfig; si
   return storyConfig.characters.map((c) => ({ character: c, side: c.defaultSide }));
 }
 
-// Build the map DialogueBox uses to resolve speaker names and dialogue styles.
 const characterMap = Object.fromEntries(
   storyConfig.characters.map((c) => [c.id, { name: c.name, styleRole: c.styleRole }])
 );
@@ -63,11 +58,10 @@ export default function GameScene({
   const [lineIndex, setLineIndex] = useState(0);
   const [lineComplete, setLineComplete] = useState(false);
   const [showChoices, setShowChoices] = useState(false);
-  // Per-character expression state — each character keeps its last expression
-  // until explicitly changed by a new line.
   const [expressions, setExpressions] = useState<Record<string, Expression>>({});
+  const [expressionHistory, setExpressionHistory] = useState<Record<string, Expression>[]>([{}]);
+  const [goingBack, setGoingBack] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const currentLine: DialogueLine = scene.lines[lineIndex];
   const isLastLine = lineIndex === scene.lines.length - 1;
@@ -89,10 +83,7 @@ export default function GameScene({
   }, [scene, sceneIndex, allScenes, visibleScenes, hasChoices]);
   const isNarration = currentLine.speaker === "narration";
 
-  // Resolve active cast once per scene change.
   const activeCast = useMemo(() => resolveActiveCast(scene), [scene]);
-
-  // Determine left/right character slots for stable two-slot layout.
   const leftSlot  = activeCast.find((s) => s.side === "left")  ?? null;
   const rightSlot = activeCast.find((s) => s.side === "right") ?? null;
 
@@ -101,19 +92,20 @@ export default function GameScene({
     setLineComplete(false);
     setShowChoices(false);
     setExpressions({});
+    setExpressionHistory([{}]);
+    setGoingBack(false);
     setNavOpen(false);
-    setSettingsOpen(false);
   }, [scene]);
 
   useEffect(() => {
-    // Update the speaking character's expression when a new line arrives.
+    if (goingBack) return;
     if (currentLine.expression !== null && currentLine.speaker !== "narration") {
       setExpressions((prev) => ({
         ...prev,
         [currentLine.speaker]: currentLine.expression,
       }));
     }
-  }, [currentLine]);
+  }, [currentLine, goingBack]);
 
   const handleLineComplete = () => {
     setLineComplete(true);
@@ -123,6 +115,7 @@ export default function GameScene({
   };
 
   const handleAdvance = () => {
+    setGoingBack(false);
     if (isLastLine) {
       if (scene.choices && scene.choices.length > 0) {
         setShowChoices(true);
@@ -130,12 +123,27 @@ export default function GameScene({
         onSceneEnd();
       }
     } else {
+      setExpressionHistory((prev) => {
+        const next = [...prev];
+        next[lineIndex + 1] = { ...expressions };
+        return next;
+      });
       setLineIndex((i) => i + 1);
       setLineComplete(false);
     }
   };
 
-  // Helpers for rendering a character component in a given slot.
+  const handleBack = () => {
+    if (lineIndex === 0) return;
+    const prevIndex = lineIndex - 1;
+    const prevExpressions = expressionHistory[prevIndex] ?? {};
+    setExpressions(prevExpressions);
+    setGoingBack(true);
+    setLineIndex(prevIndex);
+    setLineComplete(true);
+    setShowChoices(false);
+  };
+
   function renderSlot(slot: { character: CharacterConfig; side: "left" | "right" } | null) {
     if (!slot) return null;
     const { character } = slot;
@@ -157,7 +165,7 @@ export default function GameScene({
       <div className="game-top-bar">
         <button
           className="nav-toggle-btn"
-          onClick={() => { setNavOpen((o) => !o); setSettingsOpen(false); }}
+          onClick={() => setNavOpen((o) => !o)}
           aria-label="Scene navigation"
         >
           <span className="nav-toggle-icon">{navOpen ? "✕" : "☰"}</span>
@@ -180,21 +188,15 @@ export default function GameScene({
           allScenes={allScenes}
           currentIndex={visibleScenes.indexOf(scene)}
           completedScenes={completedScenes}
+          settings={settings}
+          onSettingsChange={onSettingsChange}
           onSelectScene={(i) => {
             const globalIdx = allScenes.indexOf(visibleScenes[i]);
             setNavOpen(false);
             onGoToScene(globalIdx);
           }}
-          onOpenSettings={() => { setNavOpen(false); setSettingsOpen(true); }}
           onReturnToMenu={() => { setNavOpen(false); onReturnToMenu(); }}
-        />
-      )}
-
-      {settingsOpen && (
-        <SettingsPanel
-          settings={settings}
-          onChange={onSettingsChange}
-          onClose={() => setSettingsOpen(false)}
+          onClose={() => setNavOpen(false)}
         />
       )}
 
@@ -215,6 +217,9 @@ export default function GameScene({
         line={currentLine}
         onComplete={handleLineComplete}
         onAdvance={handleAdvance}
+        onBack={handleBack}
+        isFirstLine={lineIndex === 0}
+        instantReveal={goingBack}
         isLastLine={isLastLine}
         nextSceneName={resolvedNextScene?.title ?? null}
         hasChoices={hasChoices}

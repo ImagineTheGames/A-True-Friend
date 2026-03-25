@@ -1,23 +1,15 @@
 import type { ComponentType } from "react";
 
-// Speaker is now an open string — character ids declared in story.config.ts.
-// "narration" is reserved for narrator lines.
 export type Speaker = string;
-
-// Expression is an open string so any character can use custom expression keys.
 export type Expression = string | null;
-
-// Backward-compat alias — still used by AsciiExpression internally.
 export type AiExpression = Expression;
 
-// Shared props interface all character components must satisfy.
 export interface CharacterProps {
   isActive: boolean;
   isSpeaking: boolean;
   expression?: Expression;
 }
 
-// One entry per character in the story. Defined in story.config.ts.
 export interface CharacterConfig {
   id: string;
   name: string;
@@ -26,14 +18,16 @@ export interface CharacterConfig {
   styleRole: "human" | "ai";
 }
 
-// Per-scene cast override — lets a scene place characters on non-default sides
-// or show only a subset of the cast.
 export interface CharacterSlot {
   characterId: string;
   side: "left" | "right";
 }
 
-// The single config object a fork author edits.
+export interface ChapterConfig {
+  title: string;
+  sceneIds: string[];
+}
+
 export interface StoryConfig {
   title: string;
   subtitle: string;
@@ -41,6 +35,7 @@ export interface StoryConfig {
   backgrounds?: Record<string, { gradient: string; label: string }>;
   theme?: Record<string, string>;
   defaultSettings?: Partial<GameSettings>;
+  chapters?: ChapterConfig[];
 }
 
 export interface DialogueLine {
@@ -71,12 +66,14 @@ export interface GameSettings {
   autoContinue: boolean;
   readingSpeed: ReadingSpeed;
   soundEnabled: boolean;
+  volume: number;
 }
 
 export const DEFAULT_SETTINGS: GameSettings = {
   autoContinue: false,
   readingSpeed: "normal",
   soundEnabled: true,
+  volume: 1,
 };
 
 export const SPEED_CONFIG: Record<ReadingSpeed, { typingMs: number; wpm: number; label: string }> = {

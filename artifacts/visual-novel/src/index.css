@@ -377,9 +377,6 @@ body {
   letter-spacing: 0.15em;
   text-transform: uppercase;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 120px;
 }
 
 .scene-title-chip {
